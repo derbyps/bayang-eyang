@@ -1,0 +1,1010 @@
+{
+  "version": 1,
+  "title": "Sabetan Gallery",
+  "seed": 51,
+  "cast": [
+    {
+      "id": "petruk",
+      "puppet": "petruk",
+      "name": "Petruk",
+      "type": "punakawan"
+    },
+    {
+      "id": "eyang",
+      "puppet": "eyang-putri",
+      "name": "Eyang Putri",
+      "type": "halus"
+    },
+    {
+      "id": "raksasa",
+      "puppet": "raksasa",
+      "name": "Raksasa",
+      "type": "raksasa"
+    },
+    {
+      "id": "gunungan",
+      "puppet": "gunungan",
+      "name": "Gunungan",
+      "type": "gagah"
+    },
+    {
+      "id": "as-halus",
+      "puppet": "petruk",
+      "name": "Petruk (halus)",
+      "type": "halus"
+    },
+    {
+      "id": "as-gagah",
+      "puppet": "petruk",
+      "name": "Petruk (gagah)",
+      "type": "gagah"
+    },
+    {
+      "id": "as-raksasa",
+      "puppet": "petruk",
+      "name": "Petruk (raksasa)",
+      "type": "raksasa"
+    },
+    {
+      "id": "as-punakawan",
+      "puppet": "petruk",
+      "name": "Petruk (punakawan)",
+      "type": "punakawan"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "stage",
+      "kind": "jejer",
+      "title": "Stage",
+      "start": 0
+    },
+    {
+      "id": "gesture",
+      "kind": "jejer",
+      "title": "Gesture",
+      "start": 24
+    },
+    {
+      "id": "combat",
+      "kind": "perang",
+      "title": "Combat",
+      "start": 58
+    },
+    {
+      "id": "modifiers",
+      "kind": "perang",
+      "title": "Modifiers",
+      "start": 101.8
+    },
+    {
+      "id": "light-gunungan",
+      "kind": "gunungan",
+      "title": "Light & gunungan",
+      "start": 117.7
+    },
+    {
+      "id": "four-temperaments",
+      "kind": "perang",
+      "title": "Four temperaments",
+      "start": 155.1
+    },
+    {
+      "id": "same-move-twice",
+      "kind": "gara-gara",
+      "title": "Same move twice",
+      "start": 172.9
+    },
+    {
+      "id": "ending",
+      "kind": "tancep-kayon",
+      "title": "Ending",
+      "start": 182.2
+    }
+  ],
+  "beats": [
+    {
+      "t": 0,
+      "music": "calm"
+    },
+    {
+      "t": 0,
+      "narrate": "enter · glide"
+    },
+    {
+      "t": 0,
+      "actor": "petruk",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.5
+    },
+    {
+      "t": 2.4,
+      "narrate": "exit · glide"
+    },
+    {
+      "t": 2.4,
+      "actor": "petruk",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 4.8,
+      "narrate": "enter · sneak"
+    },
+    {
+      "t": 4.8,
+      "actor": "petruk",
+      "do": "enter",
+      "style": "sneak",
+      "from": "right",
+      "to": 0.55
+    },
+    {
+      "t": 7.2,
+      "narrate": "exit · flee"
+    },
+    {
+      "t": 7.2,
+      "actor": "petruk",
+      "do": "exit",
+      "style": "flee"
+    },
+    {
+      "t": 9.6,
+      "narrate": "enter · leap"
+    },
+    {
+      "t": 9.6,
+      "actor": "petruk",
+      "do": "enter",
+      "style": "leap",
+      "from": "left",
+      "to": 0.45
+    },
+    {
+      "t": 12,
+      "narrate": "plant · firm"
+    },
+    {
+      "t": 12,
+      "actor": "petruk",
+      "do": "plant",
+      "style": "firm",
+      "to": 0.4
+    },
+    {
+      "t": 14.4,
+      "narrate": "plant · light"
+    },
+    {
+      "t": 14.4,
+      "actor": "petruk",
+      "do": "plant",
+      "style": "light",
+      "to": 0.55
+    },
+    {
+      "t": 16.8,
+      "narrate": "cross · walk"
+    },
+    {
+      "t": 16.8,
+      "actor": "petruk",
+      "do": "cross",
+      "style": "walk",
+      "to": 0.3
+    },
+    {
+      "t": 19.2,
+      "narrate": "cross · hurry"
+    },
+    {
+      "t": 19.2,
+      "actor": "petruk",
+      "do": "cross",
+      "style": "hurry",
+      "to": 0.6
+    },
+    {
+      "t": 21.6,
+      "narrate": "exit · leap"
+    },
+    {
+      "t": 21.6,
+      "actor": "petruk",
+      "do": "exit",
+      "style": "leap"
+    },
+    {
+      "t": 24,
+      "actor": "eyang",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.72
+    },
+    {
+      "t": 24.4,
+      "actor": "petruk",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.35
+    },
+    {
+      "t": 26.6,
+      "actor": "petruk",
+      "do": "speak",
+      "style": "calm",
+      "line": "(speak · calm) Good evening, everyone."
+    },
+    {
+      "t": 29.2,
+      "actor": "petruk",
+      "do": "speak",
+      "style": "animated",
+      "line": "(speak · animated) And what an evening it is!"
+    },
+    {
+      "t": 32.4,
+      "narrate": "bow · sembah"
+    },
+    {
+      "t": 32.4,
+      "actor": "petruk",
+      "do": "bow",
+      "style": "sembah"
+    },
+    {
+      "t": 34.4,
+      "narrate": "bow · deep"
+    },
+    {
+      "t": 34.4,
+      "actor": "petruk",
+      "do": "bow",
+      "style": "deep"
+    },
+    {
+      "t": 36.4,
+      "narrate": "point · accuse"
+    },
+    {
+      "t": 36.4,
+      "actor": "petruk",
+      "do": "point",
+      "style": "accuse",
+      "target": "eyang"
+    },
+    {
+      "t": 38.4,
+      "narrate": "point · guide"
+    },
+    {
+      "t": 38.4,
+      "actor": "petruk",
+      "do": "point",
+      "style": "guide",
+      "target": "eyang"
+    },
+    {
+      "t": 40.4,
+      "narrate": "look-far · shade"
+    },
+    {
+      "t": 40.4,
+      "actor": "petruk",
+      "do": "look-far",
+      "style": "shade"
+    },
+    {
+      "t": 42.4,
+      "narrate": "look-far · peer"
+    },
+    {
+      "t": 42.4,
+      "actor": "petruk",
+      "do": "look-far",
+      "style": "peer"
+    },
+    {
+      "t": 44.4,
+      "narrate": "laugh · giggle"
+    },
+    {
+      "t": 44.4,
+      "actor": "petruk",
+      "do": "laugh",
+      "style": "giggle"
+    },
+    {
+      "t": 46.4,
+      "narrate": "laugh · belly"
+    },
+    {
+      "t": 46.4,
+      "actor": "petruk",
+      "do": "laugh",
+      "style": "belly"
+    },
+    {
+      "t": 48.4,
+      "narrate": "weep · quiet"
+    },
+    {
+      "t": 48.4,
+      "actor": "petruk",
+      "do": "weep",
+      "style": "quiet"
+    },
+    {
+      "t": 50.4,
+      "narrate": "weep · sob"
+    },
+    {
+      "t": 50.4,
+      "actor": "petruk",
+      "do": "weep",
+      "style": "sob"
+    },
+    {
+      "t": 52.4,
+      "narrate": "dance · kiprah"
+    },
+    {
+      "t": 52.4,
+      "actor": "petruk",
+      "do": "dance",
+      "style": "kiprah"
+    },
+    {
+      "t": 54.4,
+      "narrate": "dance · sway"
+    },
+    {
+      "t": 54.4,
+      "actor": "petruk",
+      "do": "dance",
+      "style": "sway"
+    },
+    {
+      "t": 56.4,
+      "actor": "eyang",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 58,
+      "music": "war"
+    },
+    {
+      "t": 58,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "leap",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 60.2,
+      "narrate": "attack · thrust"
+    },
+    {
+      "t": 60.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "thrust",
+      "target": "raksasa"
+    },
+    {
+      "t": 62.2,
+      "narrate": "dodge · hop"
+    },
+    {
+      "t": 62.2,
+      "actor": "raksasa",
+      "do": "dodge",
+      "style": "hop"
+    },
+    {
+      "t": 64.2,
+      "narrate": "attack · sweep"
+    },
+    {
+      "t": 64.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "sweep",
+      "target": "raksasa"
+    },
+    {
+      "t": 66.2,
+      "narrate": "dodge · duck"
+    },
+    {
+      "t": 66.2,
+      "actor": "raksasa",
+      "do": "dodge",
+      "style": "duck"
+    },
+    {
+      "t": 68.2,
+      "narrate": "attack · slam"
+    },
+    {
+      "t": 68.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "slam",
+      "target": "raksasa"
+    },
+    {
+      "t": 70.2,
+      "narrate": "dodge · spin"
+    },
+    {
+      "t": 70.2,
+      "actor": "raksasa",
+      "do": "dodge",
+      "style": "spin"
+    },
+    {
+      "t": 72.2,
+      "narrate": "attack · kick"
+    },
+    {
+      "t": 72.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "kick",
+      "target": "raksasa"
+    },
+    {
+      "t": 74.2,
+      "narrate": "attack · grab"
+    },
+    {
+      "t": 74.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "grab",
+      "target": "raksasa"
+    },
+    {
+      "t": 76.2,
+      "narrate": "attack · charge"
+    },
+    {
+      "t": 76.2,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "charge",
+      "target": "raksasa"
+    },
+    {
+      "t": 78.2,
+      "narrate": "strike · jab"
+    },
+    {
+      "t": 78.2,
+      "actor": "petruk",
+      "do": "strike",
+      "style": "jab",
+      "target": "raksasa"
+    },
+    {
+      "t": 80.2,
+      "narrate": "strike · chop"
+    },
+    {
+      "t": 80.2,
+      "actor": "petruk",
+      "do": "strike",
+      "style": "chop",
+      "target": "raksasa"
+    },
+    {
+      "t": 82.2,
+      "narrate": "fling · spin"
+    },
+    {
+      "t": 82.2,
+      "actor": "petruk",
+      "do": "fling",
+      "style": "spin",
+      "target": "raksasa"
+    },
+    {
+      "t": 84.6,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 86.8,
+      "narrate": "fling · arc"
+    },
+    {
+      "t": 86.8,
+      "actor": "petruk",
+      "do": "fling",
+      "style": "arc",
+      "target": "raksasa"
+    },
+    {
+      "t": 89.2,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "sneak",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 91.4,
+      "narrate": "fall · crumple"
+    },
+    {
+      "t": 91.4,
+      "actor": "raksasa",
+      "do": "fall",
+      "style": "crumple"
+    },
+    {
+      "t": 93.4,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 95.6,
+      "narrate": "fall · flung-off"
+    },
+    {
+      "t": 95.6,
+      "actor": "raksasa",
+      "do": "fall",
+      "style": "flung-off"
+    },
+    {
+      "t": 97.6,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "leap",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 99.8,
+      "narrate": "fall · sink"
+    },
+    {
+      "t": 99.8,
+      "actor": "raksasa",
+      "do": "fall",
+      "style": "sink"
+    },
+    {
+      "t": 101.8,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.72
+    },
+    {
+      "t": 104,
+      "narrate": "attack · thrust + feint"
+    },
+    {
+      "t": 104,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "thrust",
+      "target": "raksasa",
+      "mods": [
+        "feint"
+      ]
+    },
+    {
+      "t": 106.5,
+      "narrate": "strike · jab + double"
+    },
+    {
+      "t": 106.5,
+      "actor": "petruk",
+      "do": "strike",
+      "style": "jab",
+      "target": "raksasa",
+      "mods": [
+        "double"
+      ]
+    },
+    {
+      "t": 109,
+      "narrate": "attack · sweep + miss"
+    },
+    {
+      "t": 109,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "sweep",
+      "target": "raksasa",
+      "mods": [
+        "miss"
+      ]
+    },
+    {
+      "t": 111.3,
+      "narrate": "strike · chop + high"
+    },
+    {
+      "t": 111.3,
+      "actor": "petruk",
+      "do": "strike",
+      "style": "chop",
+      "target": "raksasa",
+      "mods": [
+        "high"
+      ]
+    },
+    {
+      "t": 113.3,
+      "narrate": "attack · slam + low"
+    },
+    {
+      "t": 113.3,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "slam",
+      "target": "raksasa",
+      "mods": [
+        "low"
+      ]
+    },
+    {
+      "t": 115.3,
+      "narrate": "attack · kick + low + miss"
+    },
+    {
+      "t": 115.3,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "kick",
+      "target": "raksasa",
+      "mods": [
+        "low",
+        "miss"
+      ]
+    },
+    {
+      "t": 117.7,
+      "music": "calm"
+    },
+    {
+      "t": 117.7,
+      "actor": "petruk",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 118.3,
+      "narrate": "loom · rise"
+    },
+    {
+      "t": 118.3,
+      "actor": "raksasa",
+      "do": "loom",
+      "style": "rise"
+    },
+    {
+      "t": 120.7,
+      "narrate": "recede · drift"
+    },
+    {
+      "t": 120.7,
+      "actor": "raksasa",
+      "do": "recede",
+      "style": "drift"
+    },
+    {
+      "t": 123.1,
+      "narrate": "loom · rush"
+    },
+    {
+      "t": 123.1,
+      "actor": "raksasa",
+      "do": "loom",
+      "style": "rush"
+    },
+    {
+      "t": 125.5,
+      "narrate": "recede · snap"
+    },
+    {
+      "t": 125.5,
+      "actor": "raksasa",
+      "do": "recede",
+      "style": "snap"
+    },
+    {
+      "t": 127.9,
+      "actor": "raksasa",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 129.5,
+      "actor": "gunungan",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.5
+    },
+    {
+      "t": 131.7,
+      "narrate": "gunungan-open · spin"
+    },
+    {
+      "t": 131.7,
+      "actor": "gunungan",
+      "do": "gunungan-open",
+      "style": "spin"
+    },
+    {
+      "t": 135.3,
+      "narrate": "gunungan-open · rise"
+    },
+    {
+      "t": 135.3,
+      "actor": "gunungan",
+      "do": "gunungan-open",
+      "style": "rise"
+    },
+    {
+      "t": 138.9,
+      "narrate": "gunungan-storm · wind"
+    },
+    {
+      "t": 138.9,
+      "actor": "gunungan",
+      "do": "gunungan-storm",
+      "style": "wind"
+    },
+    {
+      "t": 142.5,
+      "narrate": "gunungan-storm · fire"
+    },
+    {
+      "t": 142.5,
+      "actor": "gunungan",
+      "do": "gunungan-storm",
+      "style": "fire"
+    },
+    {
+      "t": 146.1,
+      "narrate": "gunungan-close · spin"
+    },
+    {
+      "t": 146.1,
+      "actor": "gunungan",
+      "do": "gunungan-close",
+      "style": "spin"
+    },
+    {
+      "t": 149.7,
+      "narrate": "gunungan-close · sink"
+    },
+    {
+      "t": 149.7,
+      "actor": "gunungan",
+      "do": "gunungan-close",
+      "style": "sink"
+    },
+    {
+      "t": 153.3,
+      "actor": "gunungan",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 155.1,
+      "music": "war"
+    },
+    {
+      "t": 155.1,
+      "actor": "as-halus",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.14
+    },
+    {
+      "t": 155.4,
+      "actor": "as-gagah",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.38
+    },
+    {
+      "t": 155.7,
+      "actor": "as-raksasa",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.62
+    },
+    {
+      "t": 156,
+      "actor": "as-punakawan",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.86
+    },
+    {
+      "t": 158.1,
+      "narrate": "attack · sweep — halus"
+    },
+    {
+      "t": 158.1,
+      "actor": "as-halus",
+      "do": "attack",
+      "style": "sweep",
+      "target": "as-gagah"
+    },
+    {
+      "t": 161.1,
+      "narrate": "attack · sweep — gagah"
+    },
+    {
+      "t": 161.1,
+      "actor": "as-gagah",
+      "do": "attack",
+      "style": "sweep",
+      "target": "as-raksasa"
+    },
+    {
+      "t": 164.1,
+      "narrate": "attack · sweep — raksasa"
+    },
+    {
+      "t": 164.1,
+      "actor": "as-raksasa",
+      "do": "attack",
+      "style": "sweep",
+      "target": "as-punakawan"
+    },
+    {
+      "t": 167.1,
+      "narrate": "attack · sweep — punakawan"
+    },
+    {
+      "t": 167.1,
+      "actor": "as-punakawan",
+      "do": "attack",
+      "style": "sweep",
+      "target": "as-raksasa"
+    },
+    {
+      "t": 170.1,
+      "actor": "as-halus",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 170.4,
+      "actor": "as-gagah",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 170.7,
+      "actor": "as-raksasa",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 171,
+      "actor": "as-punakawan",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 172.9,
+      "music": "playful"
+    },
+    {
+      "t": 172.9,
+      "actor": "petruk",
+      "do": "enter",
+      "style": "leap",
+      "from": "left",
+      "to": 0.32
+    },
+    {
+      "t": 173.2,
+      "actor": "raksasa",
+      "do": "enter",
+      "style": "glide",
+      "from": "right",
+      "to": 0.7
+    },
+    {
+      "t": 175.4,
+      "narrate": "attack · kick — first time"
+    },
+    {
+      "t": 175.4,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "kick",
+      "target": "raksasa"
+    },
+    {
+      "t": 177.8,
+      "narrate": "laugh · giggle"
+    },
+    {
+      "t": 177.8,
+      "actor": "petruk",
+      "do": "laugh",
+      "style": "giggle"
+    },
+    {
+      "t": 179.6,
+      "narrate": "attack · kick — again: new seed, bigger swing"
+    },
+    {
+      "t": 179.6,
+      "actor": "petruk",
+      "do": "attack",
+      "style": "kick",
+      "target": "raksasa"
+    },
+    {
+      "t": 182.2,
+      "music": "calm"
+    },
+    {
+      "t": 182.2,
+      "actor": "raksasa",
+      "do": "exit",
+      "style": "flee"
+    },
+    {
+      "t": 182.5,
+      "actor": "petruk",
+      "do": "exit",
+      "style": "glide"
+    },
+    {
+      "t": 184.3,
+      "actor": "eyang",
+      "do": "enter",
+      "style": "glide",
+      "from": "left",
+      "to": 0.45
+    },
+    {
+      "t": 186.5,
+      "narrate": "linger · fade"
+    },
+    {
+      "t": 186.5,
+      "actor": "eyang",
+      "do": "linger",
+      "style": "fade"
+    },
+    {
+      "t": 186.5,
+      "sfx": "gong"
+    }
+  ]
+}

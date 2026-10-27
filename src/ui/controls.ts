@@ -26,10 +26,11 @@ export function createControls(root: HTMLElement, tl: Timeline, act: ControlsAct
   bar.dataset.visible = 'false';
   const dur = tl.duration;
   const markers = tl.scenes
-    .map(
-      (s) =>
-        `<button class="scene" type="button" style="left:${(s.start / dur) * 100}%" aria-label="Jump to ${s.title}" data-t="${s.start}"><span>${s.title}</span></button>`,
-    )
+    .map((s, i) => {
+      const next = tl.scenes[i + 1]?.start ?? dur;
+      const room = ((next - s.start) / dur) * 100;
+      return `<button class="scene" type="button" style="left:${(s.start / dur) * 100}%;--room:${room}%" aria-label="Jump to ${s.title}" data-t="${s.start}"><span>${s.title}</span></button>`;
+    })
     .join('');
   bar.innerHTML = `
     <div class="controls-row">

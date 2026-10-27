@@ -400,8 +400,29 @@ button {
   transition: color 200ms ease;
 }
 
+.scene span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scene {
+  max-width: calc(var(--room) - 4px);
+}
+
 .scene[aria-current] {
   color: var(--purple);
+  max-width: none;
+  z-index: 1;
+  background: var(--page);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scene:hover {
+    max-width: none;
+    z-index: 2;
+    background: var(--page);
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
