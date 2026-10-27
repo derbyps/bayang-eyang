@@ -20,6 +20,10 @@ export interface Renderer {
 
 export function createRenderer(canvas: HTMLCanvasElement): Renderer {
   const ctx = canvas.getContext('2d')!;
+  // Use the blur filter once up front so its first real use (a looming shadow) doesn't stall a frame.
+  ctx.filter = 'blur(4px)';
+  ctx.fillRect(0, 0, 2, 2);
+  ctx.filter = 'none';
   let stage: Rect = { x: 0, y: 0, w: 1, h: 1 };
   let dpr = 1;
   let vw = 1, vh = 1;
