@@ -4,6 +4,7 @@ import type { ValidationError } from '../script/validate';
 export interface DebugPanel {
   update(t: number): void;
   open(): void;
+  destroy(): void;
 }
 
 const PLAYS = ['demo-eyang-putri', 'showcase'];
@@ -74,12 +75,13 @@ export function createDebugPanel(
     }
   }
 
-  addEventListener('keydown', (e) => {
+  const onKey = (e: KeyboardEvent) => {
     if (e.key === 'd' || e.key === 'D') {
-      if (e.target instanceof HTMLSelectElement) return;
+      if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       panel.hidden = !panel.hidden;
     }
-  });
+  };
+  addEventListener('keydown', onKey);
 
   let active = -1;
   let last = performance.now();
@@ -87,6 +89,10 @@ export function createDebugPanel(
   return {
     open() {
       panel.hidden = false;
+    },
+    destroy() {
+      removeEventListener('keydown', onKey);
+      panel.remove();
     },
     update(t) {
       const n = performance.now();

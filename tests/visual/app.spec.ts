@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function lightLamp(page: Page) {
-  await page.goto('/');
+  await page.goto('/?lakon=demo-eyang-putri');
   await page.getByRole('button', { name: /light the lamp/i }).click();
 }
 
@@ -76,4 +76,10 @@ test('the end card appears when the play is over', async ({ page }) => {
   await expect(card).toBeVisible();
   await expect(card.getByRole('button', { name: 'Watch again' })).toBeVisible();
   await expect(card).toContainText('@derbyps.dev');
+});
+
+test.fixme('the bare site asks for a story after the lamp is lit', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /light the lamp/i }).click();
+  await expect(page.getByRole('form', { name: 'Tell the dalang a story' })).toBeVisible();
 });

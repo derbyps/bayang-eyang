@@ -2,6 +2,7 @@ import { GUNUNGAN_INK } from './icons';
 
 export interface EndCard {
   update(ended: boolean): void;
+  destroy(): void;
 }
 
 export function createEndCard(root: HTMLElement, title: string, onReplay: () => void): EndCard {
@@ -24,6 +25,7 @@ export function createEndCard(root: HTMLElement, title: string, onReplay: () => 
 
   let shown = false;
   return {
+    destroy: () => card.remove(),
     update(ended) {
       if (ended === shown) return;
       shown = ended;

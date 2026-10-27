@@ -11,6 +11,7 @@ export interface ControlsActions {
 export interface ControlsView {
   update(t: number, playing: boolean): void;
   show(): void;
+  destroy(): void;
 }
 
 const IDLE_MS = 2500;
@@ -109,7 +110,7 @@ export function createControls(root: HTMLElement, tl: Timeline, act: ControlsAct
   scrub.addEventListener('pointercancel', endDrag);
 
   // Keyboard actions are instant: no animation for things pressed many times.
-  addEventListener('keydown', (e) => {
+  const onKey = (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
     const t = Number(scrub.getAttribute('aria-valuenow'));
     if (e.key === ' ' && !(e.target instanceof HTMLButtonElement)) {
@@ -117,12 +118,20 @@ export function createControls(root: HTMLElement, tl: Timeline, act: ControlsAct
       act.togglePlay();
     } else if (e.key === 'ArrowRight') act.seek(Math.min(dur, t + 5));
     else if (e.key === 'ArrowLeft') act.seek(Math.max(0, t - 5));
-  });
+  };
+  addEventListener('keydown', onKey);
 
   let lastPlaying: boolean | null = null;
   let lastScene = -1;
   return {
     show,
+    destroy() {
+      clearTimeout(hideTimer);
+      removeEventListener('pointermove', show);
+      removeEventListener('pointerdown', show);
+      removeEventListener('keydown', onKey);
+      bar.remove();
+    },
     update(t, playing) {
       const k = Math.min(1, t / dur);
       fill.style.transform = `scaleX(${k})`;
