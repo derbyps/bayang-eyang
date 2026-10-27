@@ -3,7 +3,7 @@ export function showLampIntro(root: HTMLElement, title: string): Promise<void> {
   const layer = document.createElement('div');
   layer.className = 'over-stage intro';
   layer.innerHTML = `
-    <button class="intro-button" type="button" aria-label="Light the lamp and begin: ${title}">
+    <button class="intro-button" type="button">
       <span class="intro-eyebrow">Bayang Eyang</span>
       <span class="flame" aria-hidden="true"></span>
       <span class="intro-title" lang="jv">Nyalakan blencong</span>
@@ -11,6 +11,7 @@ export function showLampIntro(root: HTMLElement, title: string): Promise<void> {
     </button>`;
   root.appendChild(layer);
   const button = layer.querySelector('button')!;
+  button.setAttribute('aria-label', `Light the lamp and begin: ${title}`);
   return new Promise((resolve) => {
     button.addEventListener(
       'click',

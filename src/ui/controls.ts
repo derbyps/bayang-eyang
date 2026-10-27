@@ -29,7 +29,7 @@ export function createControls(root: HTMLElement, tl: Timeline, act: ControlsAct
     .map((s, i) => {
       const next = tl.scenes[i + 1]?.start ?? dur;
       const room = ((next - s.start) / dur) * 100;
-      return `<button class="scene" type="button" style="left:${(s.start / dur) * 100}%;--room:${room}%" aria-label="Jump to ${s.title}" data-t="${s.start}"><span>${s.title}</span></button>`;
+      return `<button class="scene" type="button" style="left:${(s.start / dur) * 100}%;--room:${room}%" data-t="${s.start}"><span></span></button>`;
     })
     .join('');
   bar.innerHTML = `
@@ -59,6 +59,11 @@ export function createControls(root: HTMLElement, tl: Timeline, act: ControlsAct
   const fill = bar.querySelector<HTMLElement>('.scrub-fill')!;
   const thumb = bar.querySelector<HTMLElement>('.scrub-thumb')!;
   const sceneBtns = [...bar.querySelectorAll<HTMLButtonElement>('.scene')];
+  // Scene titles come from the script (soon written by a model): set them as text.
+  sceneBtns.forEach((b, i) => {
+    b.setAttribute('aria-label', `Jump to ${tl.scenes[i].title}`);
+    b.querySelector('span')!.textContent = tl.scenes[i].title;
+  });
 
   let hideTimer = 0;
   const show = () => {

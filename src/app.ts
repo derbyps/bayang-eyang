@@ -102,7 +102,7 @@ export async function startApp(root: HTMLElement): Promise<void> {
     const sinceLit = litAt === null ? 0 : (performance.now() - litAt) / 1000;
     const dim = litAt === null ? UNLIT : UNLIT + (1 - UNLIT) * EASE.out(Math.min(1, sinceLit / LAMP_RAMP));
     renderer.draw(tl, t, { reducedMotion, dim });
-    audio.sync(tl.cues, t, clock.playing);
+    audio.sync(tl.cues, t, clock.playing, t >= tl.duration);
     captions.update(tl.captions, t);
     controls.update(t, clock.playing);
     endCard.update(litAt !== null && t >= tl.duration);

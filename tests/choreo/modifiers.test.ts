@@ -119,3 +119,32 @@ describe('arm follow-through', () => {
     expect(settleTime(refined, 'petruk', endRefined)).toBeLessThan(settleTime(clown, 'petruk', endClown));
   });
 });
+
+describe('cut beats', () => {
+  test('an attack cut before its impact does not hit', () => {
+    const t = tl([
+      { t: 3, actor: 'petruk', do: 'attack', style: 'kick', target: 'eyang' },
+      { t: 3.05, actor: 'petruk', do: 'laugh' },
+      { t: 9, actor: 'eyang', do: 'bow' },
+    ]);
+    expect(t.cues.some((c) => c.kind === 'sfx' && c.id === 'keprak')).toBe(false);
+  });
+
+  test('a fling cut before its impact leaves the target on stage', () => {
+    const t = tl([
+      { t: 3, actor: 'eyang', do: 'fling', target: 'petruk' },
+      { t: 3.05, actor: 'eyang', do: 'laugh' },
+      { t: 9, actor: 'eyang', do: 'bow' },
+    ]);
+    expect(t.cues.some((c) => c.kind === 'sfx' && c.id === 'cempala-roll')).toBe(false);
+    expect(samplePose(t, 'petruk', 6)).not.toBeNull();
+  });
+
+  test('an attack that lands before the next beat still hits', () => {
+    const t = tl([
+      { t: 3, actor: 'petruk', do: 'attack', style: 'kick', target: 'eyang' },
+      { t: 6, actor: 'petruk', do: 'laugh' },
+    ]);
+    expect(t.cues.some((c) => c.kind === 'sfx' && c.id === 'keprak')).toBe(true);
+  });
+});

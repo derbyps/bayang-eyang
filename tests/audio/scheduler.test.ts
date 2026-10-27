@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { cuesInWindow, planSchedule } from '../../src/audio/scheduler';
+import { cuesInWindow, planSchedule, shouldSilence } from '../../src/audio/scheduler';
 import type { Cue } from '../../src/choreo/cues';
 
 const cues: Cue[] = [
@@ -36,5 +36,17 @@ describe('planSchedule', () => {
   test('a horizon left behind by a time jump never fires skipped cues in a burst', () => {
     const plan = planSchedule(cues, 0.5, 2.5, 0.2);
     expect(plan.due).toEqual([]);
+  });
+});
+
+describe('shouldSilence', () => {
+  test('a user pause silences ringing voices', () => {
+    expect(shouldSilence(true, false, false)).toBe(true);
+  });
+  test('the natural end of the play lets the last gong ring out', () => {
+    expect(shouldSilence(true, false, true)).toBe(false);
+  });
+  test('nothing to silence when already stopped', () => {
+    expect(shouldSilence(false, false, false)).toBe(false);
   });
 });

@@ -1,23 +1,40 @@
-// Cache-first service worker: after one visit, the play runs with the internet off.
-const CACHE = 'bayang-eyang-v1';
+// Offline support. Hashed build assets are cache-first (their names change when they change).
+// Pages and plays are network-first, so returning visitors get updates and the cache is only
+// a fallback for when the internet is off.
+const VERSION = new URL(self.location.href).searchParams.get('v') || 'dev';
+const CACHE = `bayang-eyang-${VERSION}`;
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('bayang-eyang-') && k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
+});
+
+const store = (req, res) => {
+  if (res.ok) {
+    const copy = res.clone();
+    caches.open(CACHE).then((c) => c.put(req, copy));
+  }
+  return res;
+};
+const fromCache = (req) => caches.match(req, { ignoreSearch: req.mode === 'navigate', ignoreVary: true });
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(fromCache(req).then((hit) => hit || fetch(req).then((res) => store(req, res))));
+    return;
+  }
   event.respondWith(
-    caches.match(req, { ignoreSearch: req.mode === 'navigate', ignoreVary: true }).then(
-      (hit) =>
-        hit ||
-        fetch(req).then((res) => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
-          }
-          return res;
-        }),
-    ),
+    fetch(req)
+      .then((res) => store(req, res))
+      .catch(() => fromCache(req).then((hit) => hit || Response.error())),
   );
 });

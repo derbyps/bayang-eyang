@@ -14,3 +14,8 @@ export function planSchedule(cues: Cue[], scheduledUntil: number, t: number, loo
   const to = t + lookahead;
   return { due: to > from ? cuesInWindow(cues, from, to) : [], scheduledUntil: Math.max(scheduledUntil, to) };
 }
+
+/** Whether stopping playback should cut ringing voices: yes for a pause, no when the play simply ends. */
+export function shouldSilence(wasPlaying: boolean, playing: boolean, ended: boolean): boolean {
+  return wasPlaying && !playing && !ended;
+}

@@ -75,6 +75,15 @@ interface ActorState {
   speaking: [number, number][];
   /** Hits received: time of impact and the direction to be pushed (+1 = right). */
   hits: { t: number; dir: number }[];
+  /** Impacts this actor has scheduled; dropped if the move is cut before they land. */
+  pending: { t: number; land: () => void }[];
+}
+
+/** Lands the actor's pending impacts that happen by `until`; drops the rest (their move was cut). */
+function settle(st: ActorState, until: number) {
+  const due = st.pending.filter((p) => p.t <= until);
+  st.pending = [];
+  for (const p of due) p.land();
 }
 
 function evalKeys(keys: Keyframe[], t: number): Pose {
@@ -119,6 +128,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       onStage: [],
       speaking: [],
       hits: [],
+      pending: [],
     });
   }
 
@@ -142,6 +152,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       return;
     }
     if (!isActionBeat(beat)) return;
+    settle(states.get(beat.actor)!, beat.t);
     const span = performBeat(beat, index);
     spans.push(span);
     end = Math.max(end, span.end);
@@ -187,7 +198,9 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       st.facing = side === 'left' ? 1 : -1;
       st.templateFlip = 1;
       from = { ...REST_POSE, x: side === 'left' ? OFFSTAGE_LEFT : OFFSTAGE_RIGHT, flipX: st.facing };
-      st.keys = [{ t, pose: from, ease: 'linear' }];
+      // Keep earlier appearances: cut the history here and step to the wings.
+      if (st.keys.length) cutAt(st.keys, t);
+      st.keys.push({ t, pose: from, ease: 'linear' });
       st.enteredAt = t;
     } else {
       from = cutAt(st.keys, t);
@@ -252,18 +265,29 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
     });
 
     const target = beat.target ? states.get(beat.target) : undefined;
+    const landsHit = beat.do === 'strike' || (beat.do === 'attack' && !mods.includes('miss'));
     for (const hitT of impacts) {
-      if (!target) break;
-      const pushDir = Math.sign(xOf(target.member.id, hitT) - x) || st.facing;
-      if (beat.do === 'strike' || (beat.do === 'attack' && !mods.includes('miss'))) {
-        target.hits.push({ t: hitT, dir: pushDir });
-        cues.push({ t: hitT, kind: 'sfx', id: 'keprak' });
-      }
+      if (!target || !landsHit) break;
+      const attackerX = x;
+      st.pending.push({
+        t: hitT,
+        land: () => {
+          const pushDir = Math.sign(xOf(target.member.id, hitT) - attackerX) || st.facing;
+          target.hits.push({ t: hitT, dir: pushDir });
+          cues.push({ t: hitT, kind: 'sfx', id: 'keprak' });
+        },
+      });
     }
     if (beat.do === 'fling' && target && impacts.length > 0) {
       const hitT = impacts[0];
-      cues.push({ t: hitT, kind: 'sfx', id: 'cempala-roll' });
-      flingOff(target, hitT, x, style);
+      const throwerX = x;
+      st.pending.push({
+        t: hitT,
+        land: () => {
+          cues.push({ t: hitT, kind: 'sfx', id: 'cempala-roll' });
+          flingOff(target, hitT, throwerX, style);
+        },
+      });
     }
 
     if (beat.do === 'exit' || beat.do === 'fall' || beat.do === 'linger') {
@@ -273,6 +297,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
     return { beat: index, actor: beat.actor, start: beat.t, end: t };
   }
 
+  for (const st of states.values()) settle(st, Infinity);
   const captionsOut = trimCaptions(captions);
   for (const c of captionsOut) end = Math.max(end, c.end);
   const duration = end + TAIL;

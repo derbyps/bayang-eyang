@@ -28,7 +28,8 @@ export function patternNotes(p: Pattern, from: number, to: number): Note[] {
   if (p === 'stop') return [];
   const def = PATTERNS[p];
   const notes: Note[] = [];
-  const first = Math.max(0, Math.ceil(from / def.step - 1e-9));
+  // Start early enough to catch a swung note whose base time fell in the previous window.
+  const first = Math.max(0, Math.ceil((from - (def.swing ?? 0)) / def.step - 1e-9));
   for (let k = first; k * def.step < to; k++) {
     const base = k * def.step;
     const t = base + (def.swing && k % 2 === 1 ? def.swing : 0);

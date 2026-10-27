@@ -29,3 +29,12 @@ describe('patternNotes', () => {
     expect(patternNotes('stop', 0, 5)).toEqual([]);
   });
 });
+
+describe('windowed scheduling', () => {
+  test.each(['calm', 'war', 'playful'] as const)('%s plays the same notes in 1/60 s windows as all at once', (p) => {
+    const whole = patternNotes(p, 0, 8);
+    const windowed = [];
+    for (let i = 0; i < 8 * 60; i++) windowed.push(...patternNotes(p, i / 60, (i + 1) / 60));
+    expect(windowed.map((n) => n.t)).toEqual(whole.map((n) => n.t));
+  });
+});

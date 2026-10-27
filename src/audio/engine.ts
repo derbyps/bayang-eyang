@@ -1,7 +1,7 @@
 import type { Cue } from '../choreo/cues';
 import { gong, metallophone, playSfx, type Voices } from './instruments';
 import { SLENDRO_HZ, patternNotes, type Pattern } from './patterns';
-import { planSchedule } from './scheduler';
+import { planSchedule, shouldSilence } from './scheduler';
 
 const LOOKAHEAD = 0.2;
 const MUSIC_LEVEL = 0.55;
@@ -9,8 +9,8 @@ const MUSIC_LEVEL = 0.55;
 export interface AudioEngine {
   /** Must be called from a user gesture (browser autoplay rules). */
   unlock(): Promise<void>;
-  /** Called every frame with the timeline's cues and the current time. */
-  sync(cues: Cue[], t: number, playing: boolean): void;
+  /** Called every frame with the timeline's cues, the current time, and whether the play has ended. */
+  sync(cues: Cue[], t: number, playing: boolean, ended?: boolean): void;
   seek(t: number): void;
   setMuted(muted: boolean): void;
 }
@@ -72,10 +72,10 @@ export function createAudio(): AudioEngine {
       if (ctx.state !== 'running') await ctx.resume();
     },
 
-    sync(cues, t, playing) {
+    sync(cues, t, playing, ended = false) {
       if (!ctx || !sfxVoices || !musicVoices) return;
       if (!playing) {
-        if (wasPlaying) stopAll();
+        if (shouldSilence(wasPlaying, playing, ended)) stopAll();
         wasPlaying = false;
         scheduledUntil = musicUntil = t;
         return;

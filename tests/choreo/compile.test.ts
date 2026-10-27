@@ -125,3 +125,19 @@ describe('speakDuration', () => {
     expect(speakDuration(`[[sembah|${'a long hidden meaning '.repeat(5)}]]`)).toBe(1.5);
   });
 });
+
+describe('re-entry', () => {
+  test('an actor who exits and re-enters keeps their first appearance', () => {
+    const tl = compile(
+      build([
+        { t: 2, actor: 'gunungan', do: 'enter', from: 'left', to: 0.5 },
+        { t: 4, actor: 'gunungan', do: 'gunungan-open', style: 'spin' },
+        { t: 7, actor: 'gunungan', do: 'exit' },
+        { t: 10, actor: 'gunungan', do: 'enter', from: 'left', to: 0.5 },
+      ]),
+    );
+    const first = samplePose(tl, 'gunungan', 4.5)!;
+    expect(first.x).toBeCloseTo(0.5, 1);
+    expect(first.flipX).not.toBeCloseTo(1, 1);
+  });
+});

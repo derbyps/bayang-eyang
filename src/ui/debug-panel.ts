@@ -30,16 +30,16 @@ export function createDebugPanel(
   panel.className = 'debug';
   panel.setAttribute('aria-label', 'Dalang notes');
   panel.hidden = true;
-  const options = [...new Set([current, ...PLAYS])]
-    .map((p) => `<option value="${p}"${p === current ? ' selected' : ''}>${p}</option>`)
-    .join('');
   panel.innerHTML = `
     <header><strong>Dalang notes</strong><span data-t>t 0.00</span><span data-fps></span></header>
-    <label>Play <select data-play>${options}</select></label>
+    <label>Play <select data-play></select></label>
     <div data-status class="debug-status"></div>
     <ol data-beats class="debug-beats"></ol>`;
   root.appendChild(panel);
-  panel.querySelector<HTMLSelectElement>('[data-play]')!.addEventListener('change', (e) => {
+  // Play names can come from the URL: build options as text, never as markup.
+  const select = panel.querySelector<HTMLSelectElement>('[data-play]')!;
+  for (const name of new Set([current, ...PLAYS])) select.add(new Option(name, name, false, name === current));
+  select.addEventListener('change', (e) => {
     const url = new URL(location.href);
     url.searchParams.set('lakon', (e.target as HTMLSelectElement).value);
     url.searchParams.delete('t');
