@@ -281,6 +281,23 @@ This is a fictional "Eyang Putri" who left her village in 1965 with only a rice 
 
 The final JSON must pass every validation rule, and it must use every action in the vocabulary at least once. The style variety listed here is a minimum, and the remaining styles can be used where they fit.
 
+### 8b. Showcase script (`showcase.json`, ~3 min): every possible move
+
+The story demo stays short and narrative. A second script, the **sabetan gallery**, shows the full movement system. Each move has a caption label such as `attack · slam + feint` so viewers can see what they are watching.
+
+| Segment | Content |
+|---|---|
+| 1. Stage | Every style of `enter`, `exit`, `plant`, `cross` |
+| 2. Gesture | Every style of `speak`, `bow`, `point`, `look-far`, `laugh`, `weep`, `dance` |
+| 3. Combat | All 6 `attack` styles, every style of `strike`, `dodge`, `fling`, `fall` (actors re-enter as needed) |
+| 4. Modifiers | `feint`, `double`, `miss`, `high`, `low`, plus one combined (`kick + low + miss`) |
+| 5. Light & gunungan | Every style of `loom`, `recede`, `gunungan-open`, `gunungan-close`, `gunungan-storm` |
+| 6. Same move, four temperaments | The same puppet (Petruk rig) cast four times as halus, gagah, raksasa and punakawan. Each performs `attack/sweep` in turn, so only the motion differs. |
+| 7. Same move twice | Petruk does `attack/kick`, then `laugh`, then `attack/kick` again. This shows seeded variation and build-up, and doesn't break the anti-repeat rule. |
+| 8. Ending | `linger/fade` |
+
+The showcase loads with `?lakon=showcase` or from a switch in the developer panel. A test checks that it uses **every action, every style (51) and every modifier (5)** at least once, and that it passes validation. It is also the visual-regression fixture for the move templates.
+
 ## 9. Puppets
 
 | Puppet | Source | Temperament |
@@ -317,7 +334,7 @@ The final JSON must pass every validation rule, and it must use every action in 
 ## 11. Acceptance criteria
 
 1. `npm test` passes, and `npm run build` produces a static site that works offline after the first load.
-2. The demo script validates and uses all 22 actions. Playback runs at ~60 fps on a recent laptop, with no dropped frames visible during the perang.
+2. The demo script validates and uses all 22 actions. The showcase script validates and uses every action, all 51 styles and all 5 modifiers. Playback runs at ~60 fps on a recent laptop, with no dropped frames visible during the perang.
 3. Seeking to any scene marker shows the correct frame and the correct sound from there.
 4. Reduced-motion mode works as described in §5.
 5. The brand color roles are applied as described in §6, and nothing on the stage looks like a chatbot.
