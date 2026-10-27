@@ -26,7 +26,10 @@ export interface Shake {
   hz: number;
 }
 
+export type PhaseRole = 'anticipation' | 'action' | 'follow' | 'settle' | 'feint' | 'recoil';
+
 export interface Phase {
+  role?: PhaseRole;
   dur: number;
   ease: EaseName;
   pose: Partial<Omit<Pose, 'x'>>;
@@ -337,9 +340,12 @@ export const TARGET_REACTION: Template = {
   ],
 };
 
+const ROLES: PhaseRole[] = ['anticipation', 'action', 'follow', 'settle'];
+
+/** Returns a fresh copy of the template with each phase's role set. */
 export function getTemplate(action: Action, style: string): Template {
   if (!isValidStyle(action, style)) {
     throw new Error(`no template for ${action}/${style}; styles are ${ACTIONS[action].styles.join(', ')}`);
   }
-  return { phases: T[`${action}/${style}`] };
+  return { phases: T[`${action}/${style}`].map((p, i) => ({ ...p, pose: { ...p.pose }, role: ROLES[i] })) };
 }

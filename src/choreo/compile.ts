@@ -6,7 +6,9 @@ import { EASE, type EaseName } from './easing';
 import { POSE_KEYS, REST_POSE, type Pose } from './pose';
 import { hashSeed, mulberry32 } from './rng';
 import { TEMPERAMENTS } from './temperament';
-import { getTemplate, type Phase, type Shake, type XTarget } from './templates';
+import { getTemplate, TARGET_REACTION, type Phase, type Shake, type XTarget } from './templates';
+import { applyModifiers } from './modifiers';
+import type { Modifier } from '../script/vocabulary';
 import { sortCues, speakDuration, trimCaptions, type CaptionSpan, type Cue } from './cues';
 
 export { speakDuration } from './cues';
@@ -70,6 +72,8 @@ interface ActorState {
   enteredAt: number | null;
   onStage: [number, number][];
   speaking: [number, number][];
+  /** Hits received: time of impact and the direction to be pushed (+1 = right). */
+  hits: { t: number; dir: number }[];
 }
 
 function evalKeys(keys: Keyframe[], t: number): Pose {
@@ -113,6 +117,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       enteredAt: null,
       onStage: [],
       speaking: [],
+      hits: [],
     });
   }
 
@@ -150,12 +155,24 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
     return evalKeys(states.get(id)!.keys, t).x;
   }
 
-  function performBeat(beat: ActionBeat, index: number): BeatSpan {
+  /** The flung actor tumbles away from the thrower and leaves the stage. */
+  function flingOff(target: ActorState, t: number, throwerX: number, style: string) {
+    const tx = xOf(target.member.id, t);
+    const synthetic: ActionBeat = { t, actor: target.member.id, do: 'fall', style: 'flung-off' };
+    target.facing = Math.sign(throwerX - tx) || target.facing;
+    const span = performBeat(synthetic, -1, style === 'spin');
+    end = Math.max(end, span.end);
+  }
+
+  function performBeat(beat: ActionBeat, index: number, spinning = false): BeatSpan {
     const st = states.get(beat.actor)!;
     const profile = TEMPERAMENTS[st.member.type];
     const style = beat.style ?? defaultStyle(beat.do);
-    const phases: Phase[] = getTemplate(beat.do, style).phases;
     const rand = mulberry32(hashSeed(lakon.seed, beat.actor, st.moves++));
+    const mods = (beat.mods ?? []) as Modifier[];
+    const phases: Phase[] = applyModifiers(getTemplate(beat.do, style), mods, rand).phases;
+    if (spinning) phases.forEach((p, i) => (p.pose.flipX = i % 2 === 0 ? -1 : 1));
+    if (beat.do === 'enter') cues.push({ t: beat.t, kind: 'sfx', id: 'cempala-1' });
     const isCombat = ACTIONS[beat.do].group === 'combat';
     const baseIntensity = beat.intensity ?? 0.6;
     const intensity = isCombat ? Math.min(1, baseIntensity * (1 + 0.15 * st.combats++)) : baseIntensity;
@@ -210,6 +227,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       }
     };
 
+    const impacts: number[] = [];
     let x = from.x;
     let sticky = { depth: from.depth, opacity: from.opacity };
     phases.forEach((phase, i) => {
@@ -220,7 +238,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
       if (phase.x) x = resolveX(phase.x, x);
       if (phase.pose.flipX !== undefined) st.templateFlip = phase.pose.flipX;
       for (const key of STICKY_KEYS) if (phase.pose[key] !== undefined) sticky = { ...sticky, [key]: phase.pose[key] };
-      const overshoot = i === 1 ? 1 + profile.overshoot : 1;
+      const overshoot = phase.role === 'action' ? 1 + profile.overshoot : 1;
       const pose: Pose = { ...REST_POSE, x, ...sticky, flipX: st.facing * st.templateFlip };
       for (const key of OFFSET_KEYS) {
         const offset = phase.pose[key];
@@ -229,7 +247,23 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
         pose[key] = REST_POSE[key] + offset * gain * overshoot + noise;
       }
       st.keys.push({ t, pose, ease: phase.ease, shake: phase.shake });
+      if (phase.role === 'action' && beat.target) impacts.push(t);
     });
+
+    const target = beat.target ? states.get(beat.target) : undefined;
+    for (const hitT of impacts) {
+      if (!target) break;
+      const pushDir = Math.sign(xOf(target.member.id, hitT) - x) || st.facing;
+      if (beat.do === 'strike' || (beat.do === 'attack' && !mods.includes('miss'))) {
+        target.hits.push({ t: hitT, dir: pushDir });
+        cues.push({ t: hitT, kind: 'sfx', id: 'keprak' });
+      }
+    }
+    if (beat.do === 'fling' && target && impacts.length > 0) {
+      const hitT = impacts[0];
+      cues.push({ t: hitT, kind: 'sfx', id: 'cempala-roll' });
+      flingOff(target, hitT, x, style);
+    }
 
     if (beat.do === 'exit' || beat.do === 'fall' || beat.do === 'linger') {
       if (st.enteredAt !== null) st.onStage.push([st.enteredAt, t]);
@@ -266,6 +300,39 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
   };
 }
 
+// Offsets (from rest) traced by a recoil, as keyframes from the moment of impact.
+const RECOIL: { t: number; ease: EaseName; off: Partial<Record<'x' | 'tilt' | 'shoulderFront' | 'shoulderBack', number>> }[] = (() => {
+  let t = 0;
+  return [
+    { t: 0, ease: 'linear' as EaseName, off: {} },
+    ...TARGET_REACTION.phases.map((p) => {
+      t += p.dur;
+      const off: Record<string, number> = {};
+      for (const key of ['tilt', 'shoulderFront', 'shoulderBack'] as const) if (p.pose[key] !== undefined) off[key] = p.pose[key]!;
+      if (p.x?.kind === 'rel') off.x = p.x.dx;
+      return { t, ease: p.ease, off };
+    }),
+  ];
+})();
+const RECOIL_KEYS = ['x', 'tilt', 'shoulderFront', 'shoulderBack'] as const;
+const RECOIL_END = RECOIL[RECOIL.length - 1].t;
+
+function recoilAt(dt: number, key: (typeof RECOIL_KEYS)[number]): number {
+  if (dt <= 0 || dt >= RECOIL_END) return 0;
+  for (let i = 1; i < RECOIL.length; i++) {
+    const b = RECOIL[i];
+    if (dt <= b.t) {
+      const a = RECOIL[i - 1];
+      const k = EASE[b.ease]((dt - a.t) / (b.t - a.t));
+      const va = a.off[key] ?? 0, vb = b.off[key] ?? 0;
+      return va + (vb - va) * k;
+    }
+  }
+  return 0;
+}
+
+const ARM_KEYS = ['shoulderBack', 'elbowBack', 'shoulderFront', 'elbowFront'] as const;
+
 function bake(st: ActorState, duration: number, seed: number, reduced: boolean): Float32Array {
   const n = Math.ceil(duration * SAMPLE_RATE) + 1;
   const out = new Float32Array(n * STRIDE);
@@ -273,6 +340,9 @@ function bake(st: ActorState, duration: number, seed: number, reduced: boolean):
   const swayAmp = 0.4 + rand() * 0.4;
   const swayPhase = rand() * Math.PI * 2;
   const isGunungan = getRig(st.member.puppet as PuppetKey).arms === null;
+  const spring = TEMPERAMENTS[st.member.type].arm;
+  const armPos = [0, 0, 0, 0];
+  const armVel = [0, 0, 0, 0];
   let k = 1;
   for (let i = 0; i < n; i++) {
     const t = i / SAMPLE_RATE;
@@ -287,15 +357,42 @@ function bake(st: ActorState, duration: number, seed: number, reduced: boolean):
       pose.tilt += (seg.shake.tilt ?? 0) * wave * env;
       pose.y += (seg.shake.y ?? 0) * wave * env;
     }
+    for (const hit of st.hits) {
+      const dt = t - hit.t;
+      if (dt <= 0 || dt >= RECOIL_END) continue;
+      pose.x -= recoilAt(dt, 'x') * hit.dir;
+      pose.tilt += recoilAt(dt, 'tilt');
+      pose.shoulderFront += recoilAt(dt, 'shoulderFront');
+      pose.shoulderBack += recoilAt(dt, 'shoulderBack');
+    }
     if (!reduced) {
       pose.tilt += swayAmp * Math.sin(2 * Math.PI * 0.3 * t + swayPhase) * (isGunungan ? 0.5 : 1);
       for (const [a, b] of st.speaking) {
         if (t >= a && t <= b) pose.y += 0.0037 * Math.sin(2 * Math.PI * 4 * (t - a)) * Math.sin((Math.PI * (t - a)) / (b - a));
       }
     }
+    springArms(pose, t, i === 0);
     for (let j = 0; j < STRIDE; j++) out[i * STRIDE + j] = pose[POSE_KEYS[j]];
   }
   return out;
+
+  // Arms trail the rods on a damped spring: the secondary motion that makes a puppet feel held.
+  function springArms(pose: Pose, t: number, first: boolean) {
+    const live = st.onStage.some(([a, b]) => t >= a && t <= b);
+    for (let j = 0; j < ARM_KEYS.length; j++) {
+      const key = ARM_KEYS[j];
+      const target = pose[key];
+      if (first || !live) {
+        armPos[j] = target;
+        armVel[j] = 0;
+        continue;
+      }
+      const dt = 1 / SAMPLE_RATE;
+      armVel[j] += (spring.stiffness * (target - armPos[j]) - spring.damping * armVel[j]) * dt;
+      armPos[j] += armVel[j] * dt;
+      pose[key] = armPos[j];
+    }
+  }
 }
 
 export function samplePose(tl: Timeline, id: string, t: number): Pose | null {
