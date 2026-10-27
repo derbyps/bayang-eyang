@@ -15,7 +15,7 @@ const app = createApp({
   limiter: createRateLimiter({ limit: 5, windowMs: 3_600_000, now: Date.now }),
   budget: createBudget({ dailyUsd: Number(env.DALANG_DAILY_BUDGET_USD ?? 0.5), now: Date.now }),
   fallback,
-  tracer: createTracer(),
+  tracer: createTracer(env.SENTRY_DSN),
 });
 
 if (env.NODE_ENV === 'production') {

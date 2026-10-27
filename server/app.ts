@@ -33,6 +33,23 @@ const StoryInputSchema = z.object({
   language: z.enum(['en', 'id']).default('en'),
 });
 
+const STEP: Record<number, string> = { 0.8: 'casting', 0.9: 'scenes', 0.4: 'repair' };
+
+/** Wraps every model call in a gen_ai span with model, tokens and estimated cost. */
+function traceProvider(provider: Provider, tracer: Tracer): Provider {
+  return {
+    chat: (req) =>
+      tracer.run('gen_ai.chat', { 'dalang.step': STEP[req.temperature] ?? 'other', 'gen_ai.request.temperature': req.temperature }, async (span) => {
+        const res = await provider.chat(req);
+        span.set('gen_ai.request.model', res.model);
+        span.set('gen_ai.usage.input_tokens', res.usage.input);
+        span.set('gen_ai.usage.output_tokens', res.usage.output);
+        span.set('dalang.cost_usd', costOf(res.model, res.usage));
+        return res;
+      }),
+  };
+}
+
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
   const tracer = deps.tracer ?? createTracer();
@@ -73,18 +90,37 @@ export function createApp(deps: AppDeps): Hono {
     }
 
     const signal = c.req.raw.signal;
+    const provider = traceProvider(deps.provider, tracer);
     return stream(c, async (s) => {
       const write = (e: unknown) => s.write(`${JSON.stringify(e)}\n`);
+      let lastProblems = Infinity;
+      let model = '';
       try {
-        await tracer.run('dalang.run', { language: story.language, storyChars: Array.from(Object.values(story).join('')).length }, () =>
-          runDalang(story, deps.provider, {
+        await tracer.run('dalang.run', { language: story.language, story_chars: Array.from(Object.values(story).join('')).length }, async (root) => {
+          const result = await runDalang(story, provider, {
             seed: seed(),
             fallback: deps.fallback,
             signal,
-            onEvent: (e) => void write(e),
-            onUsage: (u) => deps.budget.record(costOf(u.model, u)),
-          }),
-        );
+            span: (name, attrs, fn) => tracer.span(name, attrs, fn),
+            onEvent: (e) => {
+              if (e.type === 'repair') {
+                if (e.problems >= lastProblems) tracer.issue('repair did not reduce problems', { model });
+                lastProblems = e.problems;
+              }
+              void write(e);
+            },
+            onUsage: (u) => {
+              model = u.model;
+              deps.budget.record(costOf(u.model, u));
+            },
+          });
+          root.set('rounds', result.rounds);
+          root.set('dropped', result.dropped);
+          root.set('fallback', String(result.fallback));
+          root.set('gen_ai.usage.input_tokens', result.tokens.input);
+          root.set('gen_ai.usage.output_tokens', result.tokens.output);
+          if (result.fallback) tracer.issue('dalang fell back', { model: result.model || 'none' });
+        });
       } catch (e) {
         if (!(e instanceof Error && e.name === 'AbortError') && !signal.aborted) await write({ type: 'unavailable' });
       }

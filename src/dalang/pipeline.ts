@@ -40,6 +40,8 @@ export interface DalangOptions {
   now?: () => number;
   /** Called after every model call with its usage (for budgets and tracing). */
   onUsage?(u: { model: string; input: number; output: number }): void;
+  /** Optional tracing wrapper for the director and the checks. */
+  span?<T>(name: string, attrs: Record<string, string | number>, fn: (s: { set(k: string, v: string | number): void }) => T): T;
 }
 
 const MAX_ROUNDS = 2;
@@ -49,6 +51,7 @@ const isAbort = (e: unknown) => e instanceof Error && e.name === 'AbortError';
 
 export async function runDalang(story: StoryInput, provider: Provider, opts: DalangOptions): Promise<DalangMeta & { lakon: Lakon }> {
   const now = opts.now ?? (() => Date.now());
+  const span = opts.span ?? ((_n, _a, fn) => fn({ set: () => undefined }));
   const started = now();
   const system = systemPrompt(story.language);
   const tokens = { input: 0, output: 0 };
@@ -116,9 +119,19 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
       if (parsed?.success) {
         last = { ...casting, scenes: parsed.data.scenes };
         opts.onEvent({ type: 'progress', stage: 'checking' });
-        const d = direct(last, opts.seed);
-        const v = validateLakon(d.lakon);
-        problems = [...storyChecks(last, d), ...(v.ok ? [] : v.errors.map((e) => e.message))];
+        const board = last;
+        const d = span('dalang.direct', { scenes: board.scenes.length }, (s) => {
+          const out = direct(board, opts.seed);
+          s.set('duration_s', Math.round(out.duration));
+          s.set('notes', out.notes.length);
+          return out;
+        });
+        problems = span('dalang.check', {}, (s) => {
+          const v = validateLakon(d.lakon);
+          const found = [...storyChecks(board, d), ...(v.ok ? [] : v.errors.map((e) => e.message))];
+          s.set('problems', found.length);
+          return found;
+        });
         if (!problems.length) return finish(d.lakon, { dropped: 0, fallback: false });
       } else {
         problems =
