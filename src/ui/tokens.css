@@ -1,0 +1,284 @@
+@import '@fontsource/cormorant-garamond/400-italic.css';
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/500-italic.css';
+@import '@fontsource/instrument-sans/400.css';
+@import '@fontsource/instrument-sans/500.css';
+@import '@fontsource/instrument-sans/600.css';
+
+:root {
+  --purple: #9d4edd;
+  --yellow: #ffc300;
+  --orange: #ff6b35;
+  --teal: #0f4c5c;
+  --page: #0b0907;
+  --cream: #f3e6cf;
+  --cream-dim: rgba(243, 230, 207, 0.62);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Instrument Sans', system-ui, sans-serif;
+  /* Stage rectangle in CSS px; set from JS on resize. */
+  --stage-x: 0px;
+  --stage-y: 0px;
+  --stage-w: 100vw;
+  --stage-h: 56.25vw;
+  --u: calc(var(--stage-h) / 100);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--page);
+  color: var(--cream);
+  font-family: var(--sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+canvas.stage {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Layers that sit exactly over the 16:9 stage. */
+.over-stage {
+  position: absolute;
+  left: var(--stage-x);
+  top: var(--stage-y);
+  width: var(--stage-w);
+  height: var(--stage-h);
+  pointer-events: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- Lamp intro ---------- */
+.intro {
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  transition: opacity 400ms var(--ease-out);
+}
+
+.intro[data-state='lit'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-button {
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--u) * 1.6);
+  padding: calc(var(--u) * 3) calc(var(--u) * 5);
+  transition: transform 160ms var(--ease-out);
+}
+
+.intro-button:active {
+  transform: scale(0.97);
+}
+
+.intro-eyebrow {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: calc(var(--u) * 1.8);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+
+.flame {
+  position: relative;
+  width: calc(var(--u) * 3.2);
+  height: calc(var(--u) * 5.6);
+  margin: calc(var(--u) * 2) 0 calc(var(--u) * 1);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 72%, #fff3c4 0%, var(--yellow) 32%, var(--orange) 70%, rgba(255, 107, 53, 0) 74%);
+  filter: drop-shadow(0 0 calc(var(--u) * 2.4) rgba(255, 195, 0, 0.55));
+  transform-origin: 50% 90%;
+  animation: flicker 2.6s ease-in-out infinite;
+}
+
+.flame::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--u) * -1.2);
+  width: calc(var(--u) * 0.5);
+  height: calc(var(--u) * 1.4);
+  transform: translateX(-50%);
+  background: #2a160b;
+  border-radius: 2px;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1, 1) rotate(-1deg); }
+  30% { transform: scale(0.97, 1.04) rotate(1.5deg); }
+  55% { transform: scale(1.02, 0.97) rotate(-0.5deg); }
+  80% { transform: scale(0.98, 1.02) rotate(1deg); }
+}
+
+.intro-title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: calc(var(--u) * 6.2);
+  line-height: 1;
+  color: var(--cream);
+}
+
+.intro-cta {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: calc(var(--u) * 1.9);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  padding: calc(var(--u) * 0.9) calc(var(--u) * 2.2);
+  border: 1px solid rgba(255, 195, 0, 0.45);
+  border-radius: 999px;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .intro-button:hover .intro-cta {
+    border-color: var(--yellow);
+    background-color: rgba(255, 195, 0, 0.08);
+  }
+}
+
+/* ---------- Captions ---------- */
+.captions {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  top: calc(var(--stage-y) + var(--stage-h) * 0.865);
+  height: calc(var(--stage-h) * 0.12);
+  padding: 0 calc(var(--stage-w) * 0.12);
+}
+
+.caption {
+  grid-area: 1 / 1;
+  max-width: 100%;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: calc(var(--u) * 3.3);
+  line-height: 1.22;
+  color: var(--cream);
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: visible;
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), filter 200ms var(--ease-out);
+}
+
+.caption[data-state='enter'],
+.caption[data-state='exit'] {
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.caption[data-state='enter'] {
+  transform: translateY(calc(var(--u) * 0.6));
+}
+
+.caption[data-state='exit'] {
+  transition-duration: 150ms;
+}
+
+.caption.narration {
+  font-style: italic;
+}
+
+.speaker {
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.56em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  margin-right: 0.7em;
+  vertical-align: 0.18em;
+}
+
+.term {
+  position: relative;
+  pointer-events: auto;
+  cursor: help;
+  text-decoration: underline dotted var(--purple);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.term-meaning {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--u) * 1);
+  width: max-content;
+  max-width: calc(var(--stage-w) * 0.3);
+  padding: calc(var(--u) * 0.9) calc(var(--u) * 1.4);
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: calc(var(--u) * 1.9);
+  line-height: 1.35;
+  color: var(--cream);
+  background: rgba(11, 9, 7, 0.94);
+  border: 1px solid var(--teal);
+  border-radius: 8px;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) scale(0.97);
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+  pointer-events: none;
+}
+
+.term:focus-visible .term-meaning,
+.term:focus .term-meaning {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .term:hover .term-meaning {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame {
+    animation: none;
+  }
+  .caption[data-state='enter'] {
+    transform: none;
+  }
+}
