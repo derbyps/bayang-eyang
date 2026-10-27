@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "title": "Harness",
+  "seed": 7,
+  "cast": [
+    { "id": "gunungan", "puppet": "gunungan", "name": "Gunungan", "type": "halus" },
+    { "id": "eyang", "puppet": "eyang-putri", "name": "Eyang Putri", "type": "halus" },
+    { "id": "petruk", "puppet": "petruk", "name": "Petruk", "type": "punakawan" },
+    { "id": "raksasa", "puppet": "raksasa", "name": "Raksasa", "type": "raksasa" }
+  ],
+  "scenes": [{ "id": "s", "kind": "jejer", "title": "Harness", "start": 0 }],
+  "beats": [
+    { "t": 0, "music": "calm" },
+    { "t": 0.2, "actor": "gunungan", "do": "enter", "from": "left" },
+    { "t": 0.4, "actor": "gunungan", "do": "gunungan-open", "style": "spin" },
+    { "t": 1, "narrate": "Long ago, by the light of the [[blencong|the oil lamp that throws the shadows]], a story began." },
+    { "t": 3.2, "actor": "gunungan", "do": "exit" },
+    { "t": 4.5, "actor": "eyang", "do": "enter", "from": "left", "to": 0.3 },
+    { "t": 6.3, "actor": "eyang", "do": "bow", "style": "sembah" },
+    { "t": 6.4, "narrate": "Eyang Putri greets the screen with a [[sembah|a bow with palms joined]]." },
+    { "t": 8, "actor": "petruk", "do": "enter", "from": "right", "style": "leap", "to": 0.68 },
+    { "t": 9.6, "actor": "petruk", "do": "speak", "style": "animated", "line": "She trusted no bank. Only the rice tin." },
+    { "t": 12, "music": "war" },
+    { "t": 12, "actor": "raksasa", "do": "enter", "from": "right", "style": "leap", "to": 0.85 },
+    { "t": 13.5, "actor": "raksasa", "do": "loom", "style": "rush" },
+    { "t": 15, "actor": "raksasa", "do": "recede", "style": "snap" },
+    { "t": 16.2, "actor": "raksasa", "do": "attack", "style": "slam", "target": "eyang" },
+    { "t": 16.3, "actor": "eyang", "do": "dodge", "style": "hop" },
+    { "t": 18, "actor": "eyang", "do": "strike", "style": "jab", "target": "raksasa" },
+    { "t": 19.2, "actor": "eyang", "do": "fling", "style": "spin", "target": "raksasa" },
+    { "t": 21, "music": "calm" },
+    { "t": 21.5, "actor": "petruk", "do": "laugh", "style": "belly" },
+    { "t": 23, "actor": "eyang", "do": "linger" }
+  ]
+}
