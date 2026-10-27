@@ -40,6 +40,7 @@ export interface BeatSpan {
 }
 
 export interface Timeline {
+  title: string;
   duration: number;
   seed: number;
   cast: CastMember[];
@@ -288,6 +289,7 @@ export function compile(lakon: Lakon, opts: CompileOptions = {}): Timeline {
   }
 
   return {
+    title: lakon.title,
     duration,
     seed: lakon.seed,
     cast: lakon.cast,

@@ -34,7 +34,7 @@
     { "t": 14.8, "actor": "semar", "do": "enter", "from": "right", "to": 0.62, "style": "sneak" },
     { "t": 16.5, "actor": "semar", "do": "speak", "style": "calm", "line": "Go, child. Even the river leaves the mountain." },
     { "t": 17.0, "actor": "eyang", "do": "bow", "style": "sembah" },
-    { "t": 19.9, "actor": "semar", "do": "cross", "style": "walk", "to": 0.9 },
+    { "t": 19.9, "actor": "semar", "do": "cross", "style": "walk", "to": 0.08 },
 
     { "t": 21.0, "music": "war" },
     { "t": 21.2, "narrate": "The city met her like a [[raksasa|a giant; in wayang, the shape every great trouble takes]]." },

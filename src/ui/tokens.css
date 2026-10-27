@@ -30,6 +30,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -280,5 +284,410 @@ button {
   }
   .caption[data-state='enter'] {
     transform: none;
+  }
+}
+
+/* ---------- Controls ---------- */
+.controls {
+  --ui: clamp(11px, calc(var(--u) * 1.7), 15px);
+  --btn: clamp(30px, calc(var(--u) * 4.4), 40px);
+  font-size: var(--ui);
+}
+
+.controls-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--stage-h) * 0.022 + var(--ui) * 2.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 0 clamp(12px, calc(var(--stage-w) * 0.02), 28px);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+
+.controls[data-visible='true'] .controls-row {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ctl {
+  display: grid;
+  place-items: center;
+  width: var(--btn);
+  height: var(--btn);
+  border-radius: 999px;
+  font-size: calc(var(--btn) * 0.48);
+  color: var(--cream-dim);
+  background: rgba(11, 9, 7, 0.55);
+  border: 1px solid rgba(15, 76, 92, 0.9);
+  transition: transform 160ms var(--ease-out), color 200ms ease, border-color 200ms ease;
+}
+
+.ctl:active {
+  transform: scale(0.97);
+}
+
+.ctl[aria-pressed='true'] {
+  color: var(--cream);
+}
+
+.ctl-primary {
+  color: var(--page);
+  background: var(--purple);
+  border-color: var(--purple);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ctl:not(.ctl-primary):hover {
+    color: var(--orange);
+    border-color: var(--orange);
+  }
+  .ctl-primary:hover {
+    background: #ad66e6;
+  }
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  color: var(--cream-dim);
+  letter-spacing: 0.02em;
+}
+
+.scenes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--stage-h) * 0.022 + 2px);
+  height: calc(var(--ui) * 1.9);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.controls[data-visible='true'] .scenes {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scene:first-child {
+  transform: none;
+}
+
+.scene {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-6px);
+  pointer-events: inherit;
+  padding: 4px 6px;
+  font-size: 0.86em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--cream-dim);
+  border-radius: 6px;
+  transition: color 200ms ease;
+}
+
+.scene[aria-current] {
+  color: var(--purple);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scene:hover {
+    color: var(--orange);
+  }
+}
+
+.scrub {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(10px, calc(var(--stage-h) * 0.022));
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.scrub-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(3px, calc(var(--stage-h) * 0.006));
+  background: rgba(15, 76, 92, 0.9);
+  transform-origin: 50% 100%;
+  transition: transform 160ms var(--ease-out);
+}
+
+.controls[data-visible='true'] .scrub-track {
+  transform: scaleY(1.8);
+}
+
+.scrub-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--orange);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.scrub-tick {
+  position: absolute;
+  bottom: 0;
+  width: 2px;
+  height: max(6px, calc(var(--stage-h) * 0.012));
+  background: rgba(243, 230, 207, 0.55);
+}
+
+.scrub-thumb {
+  position: absolute;
+  left: 0;
+  bottom: max(1.5px, calc(var(--stage-h) * 0.003));
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.25);
+  opacity: 0;
+  transition: opacity 160ms var(--ease-out);
+}
+
+.controls[data-visible='true'] .scrub-thumb,
+.scrub[data-dragging] .scrub-thumb {
+  opacity: 1;
+}
+
+/* Captions move clear of the controls while they're showing. */
+.captions {
+  transition: transform 200ms var(--ease-out);
+}
+
+#app:has(.controls[data-visible='true']) .captions {
+  transform: translateY(calc(var(--stage-h) * -0.045));
+}
+
+/* ---------- End card ---------- */
+.end-card {
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at 50% 45%, rgba(11, 9, 7, 0.55), rgba(11, 9, 7, 0.88));
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out);
+}
+
+.end-card[data-state='enter'] {
+  opacity: 0;
+}
+
+.end-inner {
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--u) * 1.2);
+  text-align: center;
+  transform: translateY(0);
+  transition: transform 400ms var(--ease-out);
+}
+
+.end-card[data-state='enter'] .end-inner {
+  transform: translateY(calc(var(--u) * 1.5));
+}
+
+.end-mark {
+  font-size: calc(var(--u) * 10);
+  color: var(--cream);
+  line-height: 0;
+  margin-bottom: calc(var(--u) * 1);
+}
+
+.end-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: calc(var(--u) * 7.5);
+  line-height: 1;
+  color: var(--cream);
+}
+
+.end-sub {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: calc(var(--u) * 3);
+  color: var(--cream-dim);
+}
+
+.end-replay {
+  margin-top: calc(var(--u) * 2);
+  padding: clamp(10px, calc(var(--u) * 1.4), 14px) clamp(20px, calc(var(--u) * 3.2), 30px);
+  font-weight: 600;
+  font-size: clamp(13px, calc(var(--u) * 2), 17px);
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: var(--purple);
+  border-radius: 999px;
+  transition: transform 160ms var(--ease-out), background-color 200ms ease;
+}
+
+.end-replay:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .end-replay:hover {
+    background: #ad66e6;
+  }
+}
+
+.end-credit {
+  margin: calc(var(--u) * 1.5) 0 0;
+  font-size: clamp(11px, calc(var(--u) * 1.6), 14px);
+  letter-spacing: 0.12em;
+  color: var(--cream-dim);
+}
+
+/* ---------- Load error ---------- */
+.stage-message {
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+}
+
+.stage-message strong {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(22px, calc(var(--u) * 5), 44px);
+  color: var(--cream);
+}
+
+.stage-message span {
+  color: var(--cream-dim);
+  font-size: clamp(12px, calc(var(--u) * 1.9), 16px);
+}
+
+/* ---------- Dev panel ---------- */
+.debug {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(380px, 44vw);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  font: 12px/1.45 ui-monospace, 'SF Mono', Menlo, monospace;
+  color: var(--cream);
+  background: rgba(11, 9, 7, 0.92);
+  border: 1px solid var(--teal);
+  border-radius: 10px;
+  z-index: 10;
+}
+
+.debug[hidden] {
+  display: none;
+}
+
+.debug header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.debug header strong {
+  flex: 1;
+  color: var(--yellow);
+}
+
+.debug select {
+  font: inherit;
+  color: var(--cream);
+  background: var(--page);
+  border: 1px solid var(--teal);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: 6px;
+}
+
+.debug-status {
+  color: var(--cream-dim);
+}
+
+.debug-status[data-error] {
+  color: var(--orange);
+}
+
+.debug-status p {
+  margin: 0 0 4px;
+}
+
+.debug-beats {
+  flex: 1;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: pre;
+  border-top: 1px solid rgba(15, 76, 92, 0.6);
+}
+
+.debug-beats li {
+  padding: 1px 4px;
+  color: var(--cream-dim);
+}
+
+.debug-beats li[aria-current='true'] {
+  color: var(--page);
+  background: var(--yellow);
+}
+
+/* ---------- Rotate hint (portrait phones) ---------- */
+.rotate-hint {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 16px;
+    padding: 32px;
+    text-align: center;
+    background: var(--page);
+  }
+  .rotate-hint .end-mark {
+    font-size: 64px;
+    transform: rotate(90deg);
+  }
+  .rotate-hint p {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--cream);
+  }
+  .rotate-hint small {
+    color: var(--cream-dim);
+    font-size: 14px;
   }
 }
