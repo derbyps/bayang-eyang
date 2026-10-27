@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "Lineup",
+  "seed": 7,
+  "cast": [
+    { "id": "eyang", "puppet": "eyang-putri", "name": "Eyang Putri", "type": "halus" },
+    { "id": "semar", "puppet": "semar", "name": "Semar", "type": "punakawan" },
+    { "id": "gunungan", "puppet": "gunungan", "name": "Gunungan", "type": "gagah" },
+    { "id": "petruk", "puppet": "petruk", "name": "Petruk", "type": "punakawan" },
+    { "id": "bagong", "puppet": "bagong", "name": "Bagong", "type": "punakawan" },
+    { "id": "raksasa", "puppet": "raksasa", "name": "Raksasa", "type": "raksasa" }
+  ],
+  "scenes": [{ "id": "s", "kind": "jejer", "title": "Lineup", "start": 0 }],
+  "beats": [
+    { "t": 0, "actor": "eyang", "do": "enter", "from": "left", "to": 0.1 },
+    { "t": 0, "actor": "semar", "do": "enter", "from": "left", "to": 0.27 },
+    { "t": 0, "actor": "gunungan", "do": "enter", "from": "left", "to": 0.48 },
+    { "t": 0, "actor": "petruk", "do": "enter", "from": "right", "to": 0.64 },
+    { "t": 0, "actor": "bagong", "do": "enter", "from": "right", "to": 0.77 },
+    { "t": 0, "actor": "raksasa", "do": "enter", "from": "right", "to": 0.91 },
+    { "t": 6, "actor": "eyang", "do": "bow" }
+  ]
+}
