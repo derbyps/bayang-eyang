@@ -120,4 +120,8 @@ describe('speakDuration', () => {
     expect(speakDuration('hi')).toBe(1.5);
     expect(speakDuration('a'.repeat(70))).toBe(5);
   });
+
+  test('counts only the visible words of glossary terms', () => {
+    expect(speakDuration(`[[sembah|${'a long hidden meaning '.repeat(5)}]]`)).toBe(1.5);
+  });
 });

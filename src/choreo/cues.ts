@@ -12,7 +12,8 @@ export interface CaptionSpan {
 const CHARS_PER_SECOND = 14;
 
 export function speakDuration(line: string): number {
-  return Math.max(1.5, line.length / CHARS_PER_SECOND);
+  const visible = line.replace(/\[\[([^|\]]+)\|[^\]]+\]\]/g, '$1');
+  return Math.max(1.5, visible.length / CHARS_PER_SECOND);
 }
 
 export function sortCues(cues: Cue[]): Cue[] {
