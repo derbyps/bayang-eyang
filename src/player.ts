@@ -19,7 +19,7 @@ export interface Player {
   light(title: string): Promise<void>;
   /** Treat the lamp as already lit (frozen frames for tests and screenshots). */
   litNow(): void;
-  load(tl: Timeline, name: string): void;
+  load(tl: Timeline, name: string, opts?: { onAnother?: () => void }): void;
   unload(): void;
   seek(t: number): void;
   play(): void;
@@ -112,7 +112,7 @@ export function createPlayer(root: HTMLElement, opts: { reducedMotion: boolean }
     litNow() {
       litAt = -Infinity;
     },
-    load(next, name) {
+    load(next, name, loadOpts = {}) {
       unload();
       tl = next;
       ui = {
@@ -122,10 +122,15 @@ export function createPlayer(root: HTMLElement, opts: { reducedMotion: boolean }
           setCaptions: (on) => captions.setVisible(on),
           setMuted: (m) => audio.setMuted(m),
         }),
-        endCard: createEndCard(root, next.title || 'Bayang Eyang', () => {
-          seek(0);
-          play();
-        }),
+        endCard: createEndCard(
+          root,
+          next.title || 'Bayang Eyang',
+          () => {
+            seek(0);
+            play();
+          },
+          loadOpts.onAnother,
+        ),
         debug: createDebugPanel(root, name, { tl: next }),
       };
       if (litAt !== null) ui.controls.show();

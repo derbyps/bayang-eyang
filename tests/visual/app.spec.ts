@@ -78,7 +78,7 @@ test('the end card appears when the play is over', async ({ page }) => {
   await expect(card).toContainText('@derbyps.dev');
 });
 
-test.fixme('the bare site asks for a story after the lamp is lit', async ({ page }) => {
+test('the bare site asks for a story after the lamp is lit', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /light the lamp/i }).click();
   await expect(page.getByRole('form', { name: 'Tell the dalang a story' })).toBeVisible();

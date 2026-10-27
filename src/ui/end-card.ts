@@ -5,7 +5,7 @@ export interface EndCard {
   destroy(): void;
 }
 
-export function createEndCard(root: HTMLElement, title: string, onReplay: () => void): EndCard {
+export function createEndCard(root: HTMLElement, title: string, onReplay: () => void, onAnother?: () => void): EndCard {
   const card = document.createElement('div');
   card.className = 'over-stage end-card';
   card.setAttribute('role', 'dialog');
@@ -16,12 +16,20 @@ export function createEndCard(root: HTMLElement, title: string, onReplay: () => 
       <span class="end-mark">${GUNUNGAN_INK}</span>
       <h1 class="end-title">Bayang Eyang</h1>
       <p class="end-sub"></p>
-      <button class="end-replay" type="button">Watch again</button>
+      <div class="end-actions">
+        <button class="end-replay" type="button">Watch again</button>
+        <button class="end-another" type="button" hidden>Tell another story</button>
+      </div>
       <p class="end-credit">@derbyps.dev</p>
     </div>`;
   card.querySelector('.end-sub')!.textContent = title;
   root.appendChild(card);
-  card.querySelector('button')!.addEventListener('click', onReplay);
+  card.querySelector('.end-replay')!.addEventListener('click', onReplay);
+  const another = card.querySelector<HTMLButtonElement>('.end-another')!;
+  if (onAnother) {
+    another.hidden = false;
+    another.addEventListener('click', onAnother);
+  }
 
   let shown = false;
   return {
