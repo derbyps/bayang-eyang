@@ -5,8 +5,8 @@ import { hashSeed, mulberry32 } from '../choreo/rng';
 import { TEMPERAMENTS } from '../choreo/temperament';
 import { getTemplate } from '../choreo/templates';
 import type { ActionBeat, Beat, CastMember, Lakon } from '../script/schema';
-import { defaultStyle, type Action, type Modifier, type Side, type Temperament } from '../script/vocabulary';
-import type { CastRole, Storyboard, StoryMove } from './storyboard';
+import { ACTIONS, COMBAT_MOD_ACTIONS, MODIFIERS, defaultStyle, isValidStyle, type Action, type Modifier, type Side, type Temperament } from '../script/vocabulary';
+import { STORY_ACTIONS, type CastRole, type Storyboard, type StoryMove } from './storyboard';
 
 export const GAP = 0.25;
 export const MAX_ON_STAGE = 4;
@@ -44,8 +44,40 @@ export function estimateMove(action: Action, style: string, type: Temperament, m
 }
 
 const actorId = (castId: string) => `c-${castId}`;
+const DIRECTOR_OWNED = new Set(['enter', 'exit', 'linger', 'gunungan-open', 'gunungan-close', 'gunungan-storm']);
+const STORY_ACTION_SET = new Set<string>(STORY_ACTIONS);
 
+/** Directs the storyboard, trimming middle moves until the play fits in two minutes. */
 export function direct(sb: Storyboard, seed: number): Directed {
+  const skip = new Set<string>();
+  let d = build(sb, seed, skip);
+  const trimmed: DirectorNote[] = [];
+  while (d.duration > MAX_LEN) {
+    const victim = pickTrim(sb, skip);
+    if (!victim) break;
+    skip.add(`${victim.scene}:${victim.move}`);
+    trimmed.push({ kind: 'trimmed', ...victim, detail: `dropped to keep the play under ${MAX_LEN} s` });
+    d = build(sb, seed, skip);
+  }
+  return { ...d, notes: [...d.notes, ...trimmed] };
+}
+
+/** The middle-most droppable move of the scene with the most kept moves: never the first, last, or a speech. */
+function pickTrim(sb: Storyboard, skip: Set<string>): { scene: number; move: number } | null {
+  const kept = sb.scenes.map((s, si) => s.moves.map((_, mi) => mi).filter((mi) => !skip.has(`${si}:${mi}`)));
+  const order = kept.map((k, si) => [si, k.length] as const).sort((a, b) => b[1] - a[1]);
+  for (const [si] of order) {
+    const k = kept[si];
+    const candidates = k.slice(1, -1).filter((mi) => sb.scenes[si].moves[mi].do !== 'speak');
+    if (!candidates.length) continue;
+    const mid = k[Math.floor(k.length / 2)];
+    candidates.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+    return { scene: si, move: candidates[0] };
+  }
+  return null;
+}
+
+function build(sb: Storyboard, seed: number, skip: Set<string>): Directed {
   const rand = mulberry32(hashSeed(seed, 'director'));
   const pick = <T>(xs: readonly T[]): T => xs[Math.floor(rand() * xs.length)];
   const notes: DirectorNote[] = [];
@@ -143,20 +175,43 @@ export function direct(sb: Storyboard, seed: number): Directed {
       beats.push({ t: round(t), narrate: line });
       t += speakDuration(line);
     }
-    scene.moves.forEach((m: StoryMove) => {
-      const actor = actorId(m.who);
-      const target = m.target ? actorId(m.target) : undefined;
+    scene.moves.forEach((m: StoryMove, mi) => {
+      if (skip.has(`${si}:${mi}`)) return;
+      const note = (kind: DirectorNoteKind, detail: string) => notes.push({ kind, scene: si, move: mi, detail });
+      if (DIRECTOR_OWNED.has(m.do)) return;
+      if (!STORY_ACTION_SET.has(m.do)) return note('unknown-action', `"${m.do}" is not a move`);
       const action = m.do as Action;
+      const actor = actorId(m.who);
+      if (!roles.has(actor)) return note('unknown-actor', `"${m.who}" is not in the cast`);
+      const needsTarget = (ACTIONS[action].needs as readonly string[]).includes('target');
+      const target = m.target && roles.has(actorId(m.target)) && m.target !== m.who ? actorId(m.target) : undefined;
+      if (m.target && !target) return note('unknown-actor', `target "${m.target}" is not in the cast`);
+      if (needsTarget && !target) return note('dropped', `${action} needs a target`);
+      if (action === 'speak' && !m.line) return note('dropped', 'speak needs a line');
+
+      let style = m.style ?? defaultStyle(action);
+      if (!isValidStyle(action, style)) {
+        note('unknown-style', `"${m.style}" is not a style of ${action}`);
+        style = defaultStyle(action);
+      }
       const keep = [actor, ...(target ? [target] : [])];
       t = ensureOn(actor, keep, t);
       if (target) t = ensureOn(target, keep, t);
-      const beat: Omit<ActionBeat, 't'> = { actor, do: action, style: m.style ?? defaultStyle(action) };
+      if (lastKey.get(actor) === `${action}/${style}`) {
+        const styles = ACTIONS[action].styles as readonly string[];
+        style = styles[(styles.indexOf(style) + 1) % styles.length];
+      }
+      const beat: Omit<ActionBeat, 't'> = { actor, do: action, style };
       if (target) beat.target = target;
-      if (m.mods?.length) beat.mods = m.mods as Modifier[];
+      const mods = cleanMods(action, m.mods);
+      if (mods.length) beat.mods = mods;
       if (m.line) beat.line = m.line;
+      const start = t;
       t = place(beat, t) + GAP;
       if (action === 'fall') removeFromStage(actor);
       if (action === 'fling' && target) removeFromStage(target);
+      const defeated = (action === 'fall' && roles.get(actor)?.role === 'trouble') || (action === 'fling' && target && roles.get(target)?.role === 'trouble');
+      if (defeated) beats.push({ t: round(start + (t - start) * 0.5), sfx: 'gong' });
     });
     // Actors who don't appear in the next scene leave the stage.
     const next = sb.scenes[si + 1];
@@ -194,3 +249,10 @@ export function direct(sb: Storyboard, seed: number): Directed {
 }
 
 const round = (x: number) => Math.round(x * 1000) / 1000;
+
+/** Keeps only modifiers the checker accepts: combat actions only, no repeats, never high with low. */
+function cleanMods(action: Action, mods: string[] | undefined): Modifier[] {
+  if (!mods?.length || !(COMBAT_MOD_ACTIONS as readonly string[]).includes(action)) return [];
+  const out = [...new Set(mods)].filter((m): m is Modifier => (MODIFIERS as readonly string[]).includes(m));
+  return out.includes('high') && out.includes('low') ? out.filter((m) => m !== 'low') : out;
+}
