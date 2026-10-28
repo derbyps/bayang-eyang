@@ -61,6 +61,33 @@ test('ollama: asks for no thinking, so Qwen answers directly like the app expect
   expect(seen.body).not.toHaveProperty('chat_template_kwargs');
 });
 
+test('a model without JSON mode is asked again without it, and never asked for it again', async () => {
+  const bodies: Record<string, unknown>[] = [];
+  const server = createServer(async (req, res) => {
+    let raw = '';
+    for await (const chunk of req) raw += chunk;
+    const body = JSON.parse(raw);
+    bodies.push(body);
+    res.setHeader('content-type', 'application/json');
+    if (body.response_format) {
+      res.statusCode = 501;
+      res.end(JSON.stringify({ error: { message: 'structured output is unavailable' } }));
+      return;
+    }
+    res.end(JSON.stringify({ model: 'qwen3.5:4b', choices: [{ index: 0, message: { role: 'assistant', content: '{"ok":true}' } }] }));
+  });
+  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+  close = () => server.close();
+  const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const provider = createProvider({ DALANG_PROVIDER: 'ollama', DALANG_MODEL: 'qwen3.5:4b', OLLAMA_URL: base });
+  const req = { system: 'sys', user: 'hi', temperature: 0.8, json: true };
+  expect((await provider.chat(req)).text).toBe('{"ok":true}');
+  expect('response_format' in bodies.at(-1)!).toBe(false);
+  const sent = bodies.length;
+  expect((await provider.chat(req)).text).toBe('{"ok":true}');
+  expect(bodies.slice(sent).map((b) => 'response_format' in b)).toEqual([false]);
+});
+
 test('cloudflare: a missing token fails at boot, naming the variable', () => {
   expect(() => createProvider({ DALANG_PROVIDER: 'cloudflare', DALANG_MODEL: GEMMA, CF_ACCOUNT_ID: 'a' })).toThrow('CF_API_TOKEN is not set');
 });

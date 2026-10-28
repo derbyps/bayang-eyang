@@ -19,25 +19,38 @@ export function createProvider(env: NodeJS.ProcessEnv): Provider {
         : null;
   if (!client) throw new Error(`Unknown DALANG_PROVIDER "${kind}"`);
 
+  // Some Ollama models (Qwen3.5) refuse JSON mode; the prompts already ask for JSON, so they are asked without it.
+  let jsonMode = true;
+  const create = (req: Parameters<Provider['chat']>[0]) =>
+    client.chat.completions.create(
+      {
+        model,
+        temperature: req.temperature,
+        messages: [
+          { role: 'system', content: req.system },
+          { role: 'user', content: req.user },
+        ],
+        ...(req.json && jsonMode ? { response_format: { type: 'json_object' as const } } : {}),
+        // Gemma 4 thinks before answering by default: 4x slower and 4x the neurons for no better JSON.
+        ...(kind === 'cloudflare' ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+        // Ollama's spelling of the same switch; models that never think ignore it.
+        ...(kind === 'ollama' ? { reasoning_effort: 'none' as const } : {}),
+      },
+      { signal: req.signal },
+    );
+  const refusesJsonMode = (e: unknown) => e instanceof OpenAI.APIError && e.status === 501 && /structured output/i.test(e.message);
+
   return {
     info: { provider: kind, model },
     async chat(req) {
-      const res = await client.chat.completions.create(
-        {
-          model,
-          temperature: req.temperature,
-          messages: [
-            { role: 'system', content: req.system },
-            { role: 'user', content: req.user },
-          ],
-          ...(req.json ? { response_format: { type: 'json_object' as const } } : {}),
-          // Gemma 4 thinks before answering by default: 4x slower and 4x the neurons for no better JSON.
-          ...(kind === 'cloudflare' ? { chat_template_kwargs: { enable_thinking: false } } : {}),
-          // Ollama's spelling of the same switch; models that never think ignore it.
-          ...(kind === 'ollama' ? { reasoning_effort: 'none' as const } : {}),
-        },
-        { signal: req.signal },
-      );
+      let res;
+      try {
+        res = await create(req);
+      } catch (e) {
+        if (!(req.json && jsonMode && refusesJsonMode(e))) throw e;
+        jsonMode = false;
+        res = await create(req);
+      }
       return {
         text: res.choices[0]?.message?.content ?? '',
         usage: { input: res.usage?.prompt_tokens ?? 0, output: res.usage?.completion_tokens ?? 0 },
