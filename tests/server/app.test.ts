@@ -71,6 +71,19 @@ describe('POST /api/dalang', () => {
     expect((await app.request('/api/dalang', post(SAMPLE_STORY, { headers: { 'content-type': 'text/plain' } }))).status).toBe(415);
   });
 
+  test('behind Render and Cloudflare, the limit follows cf-connecting-ip, not forged or proxy entries', async () => {
+    const { app } = setup();
+    for (let i = 0; i < 5; i++) {
+      // Render keeps the client's forged entries and appends a different proxy address each time.
+      const h = { 'x-forwarded-for': `10.0.0.${i}, 203.0.113.7, 10.200.0.${i}`, 'cf-connecting-ip': '203.0.113.7' };
+      await (await app.request('/api/dalang', post(SAMPLE_STORY, { headers: h }))).text();
+    }
+    const h = { 'x-forwarded-for': '7.7.7.7, 203.0.113.7, 10.200.9.9', 'cf-connecting-ip': '203.0.113.7' };
+    expect(await lines(await app.request('/api/dalang', post(SAMPLE_STORY, { headers: h })))).toEqual([expect.objectContaining({ type: 'resting' })]);
+    const other = { 'x-forwarded-for': '198.51.100.2, 10.200.9.9', 'cf-connecting-ip': '198.51.100.2' };
+    expect((await lines(await app.request('/api/dalang', post(SAMPLE_STORY, { headers: other }))))[0]).not.toMatchObject({ type: 'resting' });
+  });
+
   test('the sixth play in an hour from the same address rests, whatever the client claims', async () => {
     const { app } = setup();
     for (let i = 0; i < 5; i++) {
