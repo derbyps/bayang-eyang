@@ -88,6 +88,35 @@ test('a model without JSON mode is asked again without it, and never asked for i
   expect(bodies.slice(sent).map((b) => 'response_format' in b)).toEqual([false]);
 });
 
+test('tinker: sends the exact prompt the apprentice was trained on, thinking already closed', async () => {
+  const seen: { path?: string; auth?: string; body?: Record<string, unknown> } = {};
+  const server = createServer(async (req, res) => {
+    let raw = '';
+    for await (const chunk of req) raw += chunk;
+    Object.assign(seen, { path: req.url, auth: req.headers.authorization, body: JSON.parse(raw) });
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ model: 'tinker://run/sampler_weights/final', choices: [{ index: 0, text: '{"ok":true}' }], usage: { prompt_tokens: 5, completion_tokens: 3 } }));
+  });
+  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+  close = () => server.close();
+  const provider = createProvider({
+    DALANG_PROVIDER: 'tinker',
+    DALANG_MODEL: 'tinker://run/sampler_weights/final',
+    TINKER_API_KEY: 'tk-1',
+    TINKER_OAI_URL: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
+  });
+  const res = await provider.chat({ system: 'SYS', user: 'USER', temperature: 0.8, json: true });
+  expect(seen.path).toBe('/completions');
+  expect(seen.auth).toBe('Bearer tk-1');
+  expect(seen.body).toMatchObject({
+    model: 'tinker://run/sampler_weights/final',
+    prompt: '<|im_start|>system\nSYS<|im_end|>\n<|im_start|>user\nUSER<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n',
+    stop: ['<|im_end|>'],
+    temperature: 0.8,
+  });
+  expect(res).toEqual({ text: '{"ok":true}', usage: { input: 5, output: 3 }, model: 'tinker://run/sampler_weights/final' });
+});
+
 test('cloudflare: a missing token fails at boot, naming the variable', () => {
   expect(() => createProvider({ DALANG_PROVIDER: 'cloudflare', DALANG_MODEL: GEMMA, CF_ACCOUNT_ID: 'a' })).toThrow('CF_API_TOKEN is not set');
 });
