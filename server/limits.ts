@@ -48,7 +48,7 @@ export function createBudget(opts: { dailyUsd: number; now: () => number }) {
 
 /** USD per million tokens. Confirmed against the account in the deploy task. */
 const PRICES: Record<string, { input: number; output: number }> = {
-  'gemma-4-31B-it': { input: 0.18, output: 0.5 },
+  '@cf/google/gemma-4-26b-a4b-it': { input: 0.1, output: 0.3 },
 };
 
 export function costOf(model: string, usage: { input: number; output: number }): number {

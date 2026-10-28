@@ -2,9 +2,11 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-const PATTERNS = [/dop_v1_[A-Za-z0-9]+/, /DO_INFERENCE_KEY/];
+const NAMES = ['CF_API_TOKEN'];
 
-export function findSecrets(dir: string): { file: string; pattern: string }[] {
+/** Files under dir that contain a secret's name or one of its actual values. */
+export function findSecrets(dir: string, values: (string | undefined)[] = []): { file: string; pattern: string }[] {
+  const needles = [...NAMES, ...values.filter((v): v is string => !!v)];
   const hits: { file: string; pattern: string }[] = [];
   const walk = (d: string) => {
     for (const name of readdirSync(d)) {
@@ -12,7 +14,8 @@ export function findSecrets(dir: string): { file: string; pattern: string }[] {
       if (statSync(p).isDirectory()) walk(p);
       else {
         const text = readFileSync(p, 'latin1');
-        for (const re of PATTERNS) if (re.test(text)) hits.push({ file: relative(dir, p), pattern: re.source });
+        const found = needles.find((n) => text.includes(n));
+        if (found) hits.push({ file: relative(dir, p), pattern: NAMES.includes(found) ? found : '(secret value)' });
       }
     }
   };

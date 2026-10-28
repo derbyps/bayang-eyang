@@ -87,7 +87,7 @@ describe('POST /api/dalang', () => {
     const provider: Provider = {
       async chat(req) {
         calls++;
-        if (calls === 1) return { text: JSON.stringify(SAMPLE_CASTING), usage: { input: 1000, output: 500 }, model: 'gemma-4-31B-it' };
+        if (calls === 1) return { text: JSON.stringify(SAMPLE_CASTING), usage: { input: 1000, output: 500 }, model: '@cf/google/gemma-4-26b-a4b-it' };
         return new Promise((_, reject) =>
           req.signal?.addEventListener('abort', () => {
             sawAbort = true;
@@ -105,7 +105,7 @@ describe('POST /api/dalang', () => {
     ctrl.abort();
     await new Promise((r) => setTimeout(r, 30));
     expect(sawAbort).toBe(true);
-    expect(record).toHaveBeenCalledWith(expect.closeTo((1000 * 0.18 + 500 * 0.5) / 1e6, 9));
+    expect(record).toHaveBeenCalledWith(expect.closeTo((1000 * 0.1 + 500 * 0.3) / 1e6, 9));
   });
 });
 

@@ -13,7 +13,7 @@ const fallback = JSON.parse(readFileSync(new URL('../public/lakon/demo-eyang-put
 const app = createApp({
   provider: createProvider(env),
   limiter: createRateLimiter({ limit: Number(env.DALANG_RATE_LIMIT ?? 5), windowMs: 3_600_000, now: Date.now }),
-  budget: createBudget({ dailyUsd: Number(env.DALANG_DAILY_BUDGET_USD ?? 0.5), now: Date.now }),
+  budget: createBudget({ dailyUsd: Number(env.DALANG_DAILY_BUDGET_USD ?? 0.1), now: Date.now }),
   fallback,
   tracer: createTracer(env.SENTRY_DSN),
 });

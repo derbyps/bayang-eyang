@@ -39,8 +39,8 @@ describe('budget', () => {
 });
 
 describe('costOf', () => {
-  test('prices Gemma on DigitalOcean per million tokens', () => {
-    expect(costOf('gemma-4-31B-it', { input: 1e6, output: 1e6 })).toBeCloseTo(0.68, 5);
+  test('prices Gemma 4 on Cloudflare Workers AI per million tokens', () => {
+    expect(costOf('@cf/google/gemma-4-26b-a4b-it', { input: 1e6, output: 1e6 })).toBeCloseTo(0.4, 5);
   });
   test('local and unknown models are free', () => {
     expect(costOf('gemma4:e2b', { input: 1e6, output: 1e6 })).toBe(0);
