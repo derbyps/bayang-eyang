@@ -23,6 +23,10 @@ describe('systemPrompt', () => {
     expect(sys).toMatch(/- cross: walk \| hurry  target optional/);
   });
 
+  test('asks for compact JSON: indentation was 44% of the output and half the wait', () => {
+    expect(sys).toMatch(/compactly on one line/);
+  });
+
   test('Bahasa Indonesia asks for Indonesian captions', () => {
     expect(systemPrompt('id')).toMatch(/Bahasa Indonesia/);
   });

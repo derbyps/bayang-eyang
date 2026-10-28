@@ -24,7 +24,17 @@ describe('storyChecks', () => {
     expect(check(sb).join('\n')).toMatch(/hero/);
   });
 
-  test('names a scene left with fewer than three moves', () => {
+  test('a scene with two real moves is fine, even if the model also wrote director moves', () => {
+    const sb = nenekSari();
+    sb.scenes[3].moves = [
+      { who: 'nenek', do: 'bow' },
+      { who: 'semar', do: 'laugh' },
+      { who: 'nenek', do: 'exit' },
+    ];
+    expect(check(sb).join('\n')).not.toMatch(/Fifty Years On/);
+  });
+
+  test('names a scene left with fewer than two moves', () => {
     const sb = nenekSari();
     sb.scenes[3].moves = [
       { who: 'nenek', do: 'dance' },

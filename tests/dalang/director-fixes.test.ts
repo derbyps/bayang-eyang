@@ -41,6 +41,23 @@ describe('cross', () => {
   });
 });
 
+describe('missing targets', () => {
+  const targetOf = (d: ReturnType<typeof direct>, actor: string, action: string) =>
+    d.lakon.beats.filter(isActionBeat).find((b) => b.actor === actor && b.do === action)?.target;
+
+  test('a trouble that attacks without a target attacks the hero', () => {
+    const d = ok(withMove(1, 0, { who: 'flood', do: 'strike', style: 'chop' }));
+    expect(d.notes).toEqual([]);
+    expect(targetOf(d, 'c-flood', 'strike')).toBe('c-nenek');
+  });
+
+  test('the hero who attacks without a target attacks a trouble', () => {
+    const d = ok(withMove(1, 0, { who: 'nenek', do: 'attack', style: 'thrust' }));
+    expect(d.notes).toEqual([]);
+    expect(targetOf(d, 'c-nenek', 'attack')).toBe('c-flood');
+  });
+});
+
 describe('optional targets', () => {
   test('an unknown target on a move that needs none is ignored, not reported', () => {
     const d = ok(withMove(0, 1, { who: 'nenek', do: 'cross', target: 'the garden' }));

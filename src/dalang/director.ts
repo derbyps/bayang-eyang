@@ -95,6 +95,14 @@ function build(sb: Storyboard, seed: number, skip: Set<string>): Directed {
   const lastKey = new Map<string, string>();
   let t = 0;
 
+  /** Who a move without a target is aimed at: troubles go for the hero, everyone else for a trouble (one on stage first). */
+  const opponentOf = (actor: string): string | undefined => {
+    const others = [...roles].filter(([id]) => id !== actor);
+    const wanted = roles.get(actor)?.role === 'trouble' ? 'hero' : 'trouble';
+    const matches = others.filter(([, c]) => c.role === wanted).map(([id]) => id);
+    return matches.find((id) => onStage.includes(id)) ?? matches[0];
+  };
+
   const est = (b: ActionBeat) =>
     estimateMove(b.do, b.style ?? defaultStyle(b.do), types.get(b.actor) ?? 'gagah', (b.mods ?? []) as Modifier[]);
 
@@ -184,8 +192,9 @@ function build(sb: Storyboard, seed: number, skip: Set<string>): Directed {
       const actor = actorId(m.who);
       if (!roles.has(actor)) return note('unknown-actor', `"${m.who}" is not in the cast`);
       const needsTarget = (ACTIONS[action].needs as readonly string[]).includes('target');
-      const target = m.target && roles.has(actorId(m.target)) && m.target !== m.who ? actorId(m.target) : undefined;
-      if (m.target && !target && needsTarget) return note('unknown-actor', `target "${m.target}" is not in the cast`);
+      const named = m.target && roles.has(actorId(m.target)) && m.target !== m.who ? actorId(m.target) : undefined;
+      if (m.target && !named && needsTarget) return note('unknown-actor', `target "${m.target}" is not in the cast`);
+      const target = named ?? (needsTarget && !m.target ? opponentOf(actor) : undefined);
       if (needsTarget && !target) return note('dropped', `${action} needs a target`);
       if (action === 'speak' && !m.line) return note('dropped', 'speak needs a line');
 

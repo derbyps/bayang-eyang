@@ -51,7 +51,7 @@ export function storyChecks(sb: Storyboard, d: Directed): string[] {
   }
 
   kept.forEach((ms, si) => {
-    if (ms.length < 3) problems.push(`Scene "${sb.scenes[si].title}" needs at least 3 moves that work; it has ${ms.length}.`);
+    if (ms.length < 2) problems.push(`Scene "${sb.scenes[si].title}" needs at least 2 moves that work; it has ${ms.length}.`);
   });
 
   if (d.duration < MIN_LEN) {

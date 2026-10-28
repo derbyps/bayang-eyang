@@ -53,7 +53,7 @@ Rules:
 - Be kind and respectful: this is someone's family.
 ${lang}
 
-Answer with one JSON object only, no other text.`;
+Answer with one JSON object only, no other text. Write the JSON compactly on one line, with no indentation or line breaks.`;
 }
 
 const fence = (s: StoryInput) =>

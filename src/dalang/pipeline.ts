@@ -156,7 +156,7 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
       ...last,
       scenes: last.scenes
         .map((s, si) => ({ ...s, moves: s.moves.filter((_, mi) => !bad.has(`${si}:${mi}`)) }))
-        .filter((s) => s.moves.length >= 3),
+        .filter((s) => s.moves.length >= 2),
     };
     const d = direct(cleaned, opts.seed);
     if (!cleaned.scenes.length || !validateLakon(d.lakon).ok || d.duration < MIN_LEN) return fallBack();
