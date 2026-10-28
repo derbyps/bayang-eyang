@@ -56,6 +56,12 @@ export function createApp(deps: AppDeps): Hono {
   const seed = deps.seed ?? (() => Math.floor(Math.random() * 2 ** 31));
 
   app.get('/api/health', (c) => c.json({ ok: true }));
+  // TEMPORARY probe (remove after checking Render's proxy headers): echoes only the caller's own address headers.
+  app.get('/api/whoami', (c) => {
+    const incoming = (c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined)?.incoming;
+    const pick = ['x-forwarded-for', 'cf-connecting-ip', 'true-client-ip', 'x-real-ip', 'forwarded', 'x-envoy-external-address', 'rndr-id'];
+    return c.json({ ...Object.fromEntries(pick.map((h) => [h, c.req.header(h) ?? null])), socket: incoming?.socket?.remoteAddress ?? null });
+  });
 
   app.post('/api/dalang', async (c) => {
     if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'send JSON' }, 415);
