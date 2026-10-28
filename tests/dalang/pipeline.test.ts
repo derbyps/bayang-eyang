@@ -38,10 +38,35 @@ describe('runDalang', () => {
   });
 
   test('a repaired storyboard counts one round', async () => {
-    const { result, events } = await run([casting, badScenes, scenes]);
+    const { result, events, calls } = await run([casting, badScenes, scenes]);
+    expect(calls[2].user).toContain('<story>');
+    expect(calls[2].user).toContain('"id":"flood"');
     expect(events.filter((e) => e.type === 'repair')).toHaveLength(1);
     expect(result.rounds).toBe(1);
     expect(result.fallback).toBe(false);
+  });
+
+  test('unknown styles alone are accepted without a repair round', async () => {
+    const styled = JSON.stringify({
+      scenes: SAMPLE_SCENES.scenes.map((sc, i) => (i ? sc : { ...sc, moves: sc.moves.map((m, j) => (j ? m : { ...m, style: 'moonwalk' })) })),
+    });
+    const { result, calls } = await run([casting, styled]);
+    expect(result.rounds).toBe(0);
+    expect(result.fallback).toBe(false);
+    expect(calls).toHaveLength(2);
+  });
+
+  test('a repair round also lists unknown styles alongside real problems', async () => {
+    const both = JSON.stringify({
+      scenes: SAMPLE_SCENES.scenes.map((sc, i) => ({
+        ...sc,
+        kind: 'jejer',
+        moves: i ? sc.moves : sc.moves.map((m, j) => (j ? m : { ...m, style: 'moonwalk' })),
+      })),
+    });
+    const { calls } = await run([casting, both, scenes]);
+    expect(calls[2].user).toMatch(/gara-gara/);
+    expect(calls[2].user).toMatch(/moonwalk/);
   });
 
   test('non-JSON model output repairs then falls back', async () => {

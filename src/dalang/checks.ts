@@ -7,24 +7,36 @@ import { STORY_ACTIONS, type Storyboard } from './storyboard';
 const DIRECTOR_OWNED = new Set(['enter', 'exit', 'plant', 'linger', 'gunungan-open', 'gunungan-close', 'gunungan-storm']);
 const DOMINANCE = 0.4;
 
+const where = (sb: Storyboard, si: number, mi: number) => `Scene ${si + 1} ("${sb.scenes[si].title}"), move ${mi + 1}`;
+
+/**
+ * Unknown styles, phrased for the model. The director already plays the default style,
+ * so these ride along with a repair round but never cause one.
+ */
+export function styleNotes(sb: Storyboard, d: Directed): string[] {
+  return d.notes.flatMap((n) => {
+    const m = sb.scenes[n.scene]?.moves[n.move];
+    if (n.kind !== 'unknown-style' || !m) return [];
+    const styles = (ACTIONS[m.do as Action]?.styles ?? []).join(', ');
+    return [`${where(sb, n.scene, n.move)}: "${m.who}" uses ${m.do}/${m.style}; ${m.do} styles are ${styles}.`];
+  });
+}
+
+/** Problems that make a storyboard worth another round with the model. */
 export function storyChecks(sb: Storyboard, d: Directed): string[] {
   const problems: string[] = [];
   const lost = new Set(d.notes.filter((n) => n.kind !== 'unknown-style').map((n) => `${n.scene}:${n.move}`));
   const kept = sb.scenes.map((s, si) => s.moves.filter((m, mi) => !lost.has(`${si}:${mi}`) && !DIRECTOR_OWNED.has(m.do)));
-  const where = (si: number, mi: number) => `Scene ${si + 1} ("${sb.scenes[si].title}"), move ${mi + 1}`;
 
   for (const n of d.notes) {
     const m = sb.scenes[n.scene]?.moves[n.move];
     if (!m) continue;
-    if (n.kind === 'unknown-style') {
-      const styles = (ACTIONS[m.do as Action]?.styles ?? []).join(', ');
-      problems.push(`${where(n.scene, n.move)}: "${m.who}" uses ${m.do}/${m.style}; ${m.do} styles are ${styles}.`);
-    } else if (n.kind === 'unknown-action') {
-      problems.push(`${where(n.scene, n.move)}: "${m.do}" is not a move. Use one of: ${STORY_ACTIONS.join(', ')}.`);
+    if (n.kind === 'unknown-action') {
+      problems.push(`${where(sb, n.scene, n.move)}: "${m.do}" is not a move. Use one of: ${STORY_ACTIONS.join(', ')}.`);
     } else if (n.kind === 'unknown-actor') {
-      problems.push(`${where(n.scene, n.move)}: ${n.detail}. The cast ids are: ${sb.cast.map((c) => c.id).join(', ')}.`);
+      problems.push(`${where(sb, n.scene, n.move)}: ${n.detail}. The cast ids are: ${sb.cast.map((c) => c.id).join(', ')}.`);
     } else if (n.kind === 'dropped') {
-      problems.push(`${where(n.scene, n.move)}: ${n.detail}.`);
+      problems.push(`${where(sb, n.scene, n.move)}: ${n.detail}.`);
     }
   }
 

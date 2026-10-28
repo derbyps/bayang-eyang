@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { storyChecks, variety } from '../../src/dalang/checks';
+import { storyChecks, styleNotes, variety } from '../../src/dalang/checks';
 import { direct } from '../../src/dalang/director';
 import { nenekSari } from '../../src/dalang/sample';
 import type { Storyboard } from '../../src/dalang/storyboard';
@@ -46,13 +46,26 @@ describe('storyChecks', () => {
     expect(check(sb).join('\n')).toMatch(/"speak"/);
   });
 
-  test('explains unknown styles and actions with the valid choices', () => {
+  test('explains unknown actions with the valid choices', () => {
     const sb = nenekSari();
-    sb.scenes[0].moves.splice(1, 0, { who: 'nenek', do: 'laugh', style: 'moonwalk' }, { who: 'nenek', do: 'teleport' });
+    sb.scenes[0].moves.splice(1, 0, { who: 'nenek', do: 'teleport' });
     const msg = check(sb).join('\n');
-    expect(msg).toMatch(/giggle, belly/);
     expect(msg).toMatch(/teleport/);
     expect(msg).toMatch(/attack/);
+  });
+
+  test('an unknown style alone is not a problem: the director plays the default style', () => {
+    const sb = nenekSari();
+    sb.scenes[0].moves.splice(1, 0, { who: 'nenek', do: 'laugh', style: 'moonwalk' });
+    expect(check(sb)).toEqual([]);
+  });
+});
+
+describe('styleNotes', () => {
+  test('explains an unknown style with the valid styles', () => {
+    const sb = nenekSari();
+    sb.scenes[0].moves.splice(1, 0, { who: 'nenek', do: 'laugh', style: 'moonwalk' });
+    expect(styleNotes(sb, direct(sb, 1)).join('\n')).toMatch(/laugh\/moonwalk; laugh styles are giggle, belly/);
   });
 });
 

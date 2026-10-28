@@ -18,6 +18,37 @@ const withMove = (scene: number, at: number, m: StoryMove) => {
   return sb;
 };
 
+describe('cross', () => {
+  const beatsOf = (d: ReturnType<typeof direct>, actor: string) => d.lakon.beats.filter(isActionBeat).filter((b) => b.actor === actor);
+
+  test('walks toward the target, then settles back into its own place', () => {
+    const d = ok(withMove(1, 1, { who: 'nenek', do: 'cross', target: 'flood' }));
+    const mine = beatsOf(d, 'c-nenek');
+    const i = mine.findIndex((b) => b.do === 'cross');
+    const flood = beatsOf(d, 'c-flood').filter((b) => b.t <= mine[i].t && b.to !== undefined).at(-1)!;
+    expect(Math.abs(mine[i].to! - flood.to!)).toBeLessThan(0.2);
+    expect(mine[i + 1]).toMatchObject({ do: 'plant' });
+    const home = mine.slice(0, i).filter((b) => b.to !== undefined).at(-1)!;
+    expect(mine[i + 1].to).toBe(home.to);
+  });
+
+  test('without a target, walks a good way across the stage', () => {
+    const d = ok(withMove(0, 1, { who: 'nenek', do: 'cross' }));
+    const mine = beatsOf(d, 'c-nenek');
+    const cross = mine.find((b) => b.do === 'cross')!;
+    const home = mine.filter((b) => b.t < cross.t && b.to !== undefined).at(-1)!;
+    expect(Math.abs(cross.to! - home.to!)).toBeGreaterThanOrEqual(0.2);
+  });
+});
+
+describe('optional targets', () => {
+  test('an unknown target on a move that needs none is ignored, not reported', () => {
+    const d = ok(withMove(0, 1, { who: 'nenek', do: 'cross', target: 'the garden' }));
+    expect(d.notes).toEqual([]);
+    expect(d.lakon.beats.filter(isActionBeat).some((b) => b.actor === 'c-nenek' && b.do === 'cross')).toBe(true);
+  });
+});
+
 describe('silent fixes and notes', () => {
   test('an unknown style becomes the default and is noted', () => {
     const d = ok(withMove(0, 1, { who: 'nenek', do: 'laugh', style: 'moonwalk' }));

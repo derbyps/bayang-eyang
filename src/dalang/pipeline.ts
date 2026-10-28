@@ -1,10 +1,10 @@
 // The dalang at work: cast, write the scenes, direct, check, repair, and never leave the screen empty.
 import type { Lakon } from '../script/schema';
 import { validateLakon } from '../script/validate';
-import { storyChecks } from './checks';
+import { storyChecks, styleNotes } from './checks';
 import { MIN_LEN, direct } from './director';
 import { castingPrompt, extractJson, repairPrompt, scenesPrompt, systemPrompt } from './prompts';
-import { CastingSchema, ScenesSchema, type Casting, type Storyboard, type StoryInput } from './storyboard';
+import { CastingSchema, ScenesSchema, resolveActors, type Casting, type Storyboard, type StoryInput } from './storyboard';
 import type { ZodType } from 'zod';
 
 export interface Provider {
@@ -87,7 +87,7 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
           : parsed!.error.issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`);
       if (round >= MAX_ROUNDS) return null;
       beforeRepair(problems.length);
-      text = await call(repairPrompt(json ?? text, problems), TEMP.repair);
+      text = await call(repairPrompt(json ?? text, problems, user), TEMP.repair);
     }
   }
 
@@ -110,14 +110,15 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
 
     opts.onEvent({ type: 'progress', stage: 'scenes' });
     const scenesRounds = rounds;
-    let text = await call(scenesPrompt(story, casting), TEMP.scenes);
+    const request = scenesPrompt(story, casting);
+    let text = await call(request, TEMP.scenes);
     let last: Storyboard | null = null;
     for (;;) {
       const json = extractJson(text);
       const parsed = json === null ? null : ScenesSchema.safeParse(json);
       let problems: string[];
       if (parsed?.success) {
-        last = { ...casting, scenes: parsed.data.scenes };
+        last = resolveActors({ ...casting, scenes: parsed.data.scenes });
         opts.onEvent({ type: 'progress', stage: 'checking' });
         const board = last;
         const d = span('dalang.direct', { scenes: board.scenes.length }, (s) => {
@@ -133,6 +134,7 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
           return found;
         });
         if (!problems.length) return finish(d.lakon, { dropped: 0, fallback: false });
+        problems.push(...styleNotes(board, d));
       } else {
         problems =
           json === null
@@ -141,7 +143,7 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
       }
       if (rounds - scenesRounds >= MAX_ROUNDS) break;
       repairEvent(problems.length);
-      text = await call(repairPrompt(json ?? text, problems), TEMP.repair);
+      text = await call(repairPrompt(json ?? text, problems, request), TEMP.repair);
     }
 
     // Out of repairs: keep only the moves that work, and perform those.

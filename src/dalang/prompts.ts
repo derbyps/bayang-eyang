@@ -14,7 +14,9 @@ const TEMPERAMENTS = `halus (refined, slow, graceful), gagah (strong, firm), rak
 function vocabulary(): string {
   const lines = STORY_ACTIONS.map((a) => {
     const def = ACTIONS[a];
-    const needs = def.needs.length ? `  needs: ${def.needs.join(', ')}` : '';
+    // Positions (to, from) belong to the director; the model only ever names who.
+    const asked = def.needs.filter((n) => n === 'target' || n === 'line');
+    const needs = a === 'cross' ? '  target optional: who to walk toward' : asked.length ? `  needs: ${asked.join(', ')}` : '';
     return `- ${a}: ${def.styles.join(' | ')}${needs}`;
   });
   return `${lines.join('\n')}\nModifiers (only for ${COMBAT_MOD_ACTIONS.join(' and ')}): ${MODIFIERS.join(', ')}. Never use high and low together.`;
@@ -78,11 +80,13 @@ ${JSON.stringify(casting.cast)}
 
 Write the scenes. Answer with JSON shaped like:
 {"scenes": [{"kind": "jejer|perang|gara-gara", "title": "...", "narration": ["..."], "moves": [{"who": "cast id", "do": "action", "style": "style", "target": "cast id (when needed)", "mods": ["..."], "line": "spoken words (for speak)"}]}]}
+Omit "line" unless "do" is speak. Omit "target" unless the move needs one. Omit "mods" unless you use one.
 Include at least one gara-gara. Give the hero moves in at least two scenes.`;
 }
 
-export function repairPrompt(previous: unknown, problems: string[]): string {
-  return `Your previous answer had problems:
+/** The repair call is a fresh conversation, so it repeats the original request (story and cast). */
+export function repairPrompt(previous: unknown, problems: string[], request?: string): string {
+  return `${request ? `The original request was:\n${request}\n\n` : ''}Your previous answer had problems:
 ${problems.map((p) => `- ${p}`).join('\n')}
 
 Previous answer:

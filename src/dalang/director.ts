@@ -185,7 +185,7 @@ function build(sb: Storyboard, seed: number, skip: Set<string>): Directed {
       if (!roles.has(actor)) return note('unknown-actor', `"${m.who}" is not in the cast`);
       const needsTarget = (ACTIONS[action].needs as readonly string[]).includes('target');
       const target = m.target && roles.has(actorId(m.target)) && m.target !== m.who ? actorId(m.target) : undefined;
-      if (m.target && !target) return note('unknown-actor', `target "${m.target}" is not in the cast`);
+      if (m.target && !target && needsTarget) return note('unknown-actor', `target "${m.target}" is not in the cast`);
       if (needsTarget && !target) return note('dropped', `${action} needs a target`);
       if (action === 'speak' && !m.line) return note('dropped', 'speak needs a line');
 
@@ -202,11 +202,21 @@ function build(sb: Storyboard, seed: number, skip: Set<string>): Directed {
         style = styles[(styles.indexOf(style) + 1) % styles.length];
       }
       const beat: Omit<ActionBeat, 't'> = { actor, do: action, style };
-      if (target) beat.target = target;
+      if (target && action !== 'cross') beat.target = target;
       const mods = cleanMods(action, m.mods);
       if (mods.length) beat.mods = mods;
       if (m.line) beat.line = m.line;
       const start = t;
+      if (action === 'cross') {
+        // Walk up to the target (or over to the other half of the stage), then settle back home.
+        const home = slotOf.get(actor)!;
+        const there = target ? slotOf.get(target)! : undefined;
+        const dest = there !== undefined ? there + (home < there ? -0.12 : 0.12) : home === 0.5 ? 0.28 : 1 - home;
+        beat.to = round(Math.min(0.92, Math.max(0.08, dest)));
+        t = place(beat, t) + GAP;
+        t = place({ actor, do: 'plant', style: 'light', to: home }, t) + GAP;
+        return;
+      }
       t = place(beat, t) + GAP;
       if (action === 'fall') removeFromStage(actor);
       if (action === 'fling' && target) removeFromStage(target);
