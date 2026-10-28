@@ -28,6 +28,10 @@ Privacy proof, same span with the Input tab open: "No input for this span".
   - gemma3:4b: 4 of 12 real plays, 8 fell back, 0% first try, p50 4 min 11 s / p90 5 min 16 s
   - qwen3.5:4b, untrained: 0 real plays (11 stories ran fully; the 12th was cut off when the local server stopped), avg 1.7 repair rounds, p50 2 min 14 s
   - Gemma 4 26B (Cloudflare): 12 of 12 real plays, 75% first try, p50 25 s
+  - Qwen3.5-4B apprentice (LoRA on Tinker, run through Tinker's endpoint): 10 of 12 real plays, all 10 on the first try (83%), 2 fell back; p50 8.9 s; 13.8 distinct moves per play (Gemma 4: 12.9)
+  - why the 2 misses stay misses: the apprentice only ever saw first-try answers, never a repair round, so when it slips it can't fix itself; Gemma 4 can
+  - training: 182 examples, 3 passes, ~$0.50 of Tinker credit; held-out loss 0.61 -> 0.38
+  - local run of the apprentice on an 8 GB M1 (Ollama, nvfp4, 4.4 GB): answers correctly but 1-5 min per call; a full 12-story run froze the Mac (watchdog panic), so the 12-story number comes from the cloud run
 - teacher data: Gemma 4 invented 169 practice stories and performed 98 before the free daily allowance ran out; 91 passed every check (53 on the first try) = 182 training examples
 
 Image hosting: upload images through the DEV editor, or link them from `main` after the branch merges (branch links break when the branch is deleted).
