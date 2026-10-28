@@ -9,3 +9,4 @@ tests/visual/*-snapshots/*.actual.png
 apprentice/.venv
 apprentice/logs
 apprentice/weights
+apprentice/__pycache__
