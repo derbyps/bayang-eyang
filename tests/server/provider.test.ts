@@ -52,6 +52,15 @@ test('cloudflare: calls the account endpoint with the token and thinking switche
   expect(res).toEqual({ text: '{"ok":true}', usage: { input: 12, output: 34 }, model: GEMMA });
 });
 
+test('ollama: asks for no thinking, so Qwen answers directly like the app expects', async () => {
+  const { base, seen } = await stubCloudflare();
+  const provider = createProvider({ DALANG_PROVIDER: 'ollama', DALANG_MODEL: 'qwen3.5:4b', OLLAMA_URL: base });
+  await provider.chat({ system: 'sys', user: 'hi', temperature: 0.8, json: true });
+  expect(seen.path).toBe('/v1/chat/completions');
+  expect(seen.body).toMatchObject({ model: 'qwen3.5:4b', reasoning_effort: 'none' });
+  expect(seen.body).not.toHaveProperty('chat_template_kwargs');
+});
+
 test('cloudflare: a missing token fails at boot, naming the variable', () => {
   expect(() => createProvider({ DALANG_PROVIDER: 'cloudflare', DALANG_MODEL: GEMMA, CF_ACCOUNT_ID: 'a' })).toThrow('CF_API_TOKEN is not set');
 });

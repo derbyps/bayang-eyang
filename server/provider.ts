@@ -33,6 +33,8 @@ export function createProvider(env: NodeJS.ProcessEnv): Provider {
           ...(req.json ? { response_format: { type: 'json_object' as const } } : {}),
           // Gemma 4 thinks before answering by default: 4x slower and 4x the neurons for no better JSON.
           ...(kind === 'cloudflare' ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+          // Ollama's spelling of the same switch; models that never think ignore it.
+          ...(kind === 'ollama' ? { reasoning_effort: 'none' as const } : {}),
         },
         { signal: req.signal },
       );
