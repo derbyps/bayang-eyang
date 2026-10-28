@@ -14,6 +14,10 @@ From this run (live site, fictional test story, 2026-10-28):
 - director 3.95 ms, checks 6.96 ms: the model takes seconds, our own code takes milliseconds
 - no story text, prompts or model output are sent to Sentry (only models, token counts, timings and costs)
 
+Privacy proof, same span with the Input tab open: "No input for this span".
+
+![The same chat span in Sentry with the Input tab open, showing "No input for this span"](../images/sentry-no-input.png)
+
 ## Eval: what made real Gemma 4 work
 
 - first attempt on Cloudflare Gemma 4: 2 of 3 stories fell back to the demo play
