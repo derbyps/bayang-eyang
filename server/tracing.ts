@@ -76,12 +76,16 @@ export function createTracer(dsn?: string, transport?: Sentry.NodeOptions['trans
     beforeSend: (e) => scrub(e),
     beforeSendTransaction: (e) => scrub(e),
   });
-  const op = (name: string) => (name.startsWith('gen_ai.') ? name : 'dalang');
+  // Sentry's AI Agents view keys on gen_ai.<operation> ops (invoke_agent, chat, execute_tool).
+  const op = (attrs: Record<string, string | number>) => {
+    const operation = attrs['gen_ai.operation.name'];
+    return operation ? `gen_ai.${operation}` : 'dalang';
+  };
   return {
     run: (name, attrs, fn) =>
-      Sentry.startSpan({ name, op: op(name), attributes: attrs }, (span) => fn({ set: (k, v) => span.setAttribute(k, v) })),
+      Sentry.startSpan({ name, op: op(attrs), attributes: attrs }, (span) => fn({ set: (k, v) => span.setAttribute(k, v) })),
     span: (name, attrs, fn) =>
-      Sentry.startSpan({ name, op: op(name), attributes: attrs }, (span) => fn({ set: (k, v) => span.setAttribute(k, v) })),
+      Sentry.startSpan({ name, op: op(attrs), attributes: attrs }, (span) => fn({ set: (k, v) => span.setAttribute(k, v) })),
     issue: (message, tags) => void Sentry.captureMessage(message, { level: 'warning', tags }),
   };
 }

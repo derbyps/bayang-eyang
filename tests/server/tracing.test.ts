@@ -42,7 +42,14 @@ describe('Sentry tracing', () => {
     await res.text();
     await Sentry.flush(2000);
     const all = sent.join('\n');
-    for (const name of ['dalang.run', 'gen_ai.chat', 'dalang.direct', 'dalang.check']) expect(all).toContain(name);
+    // Sentry's AI Agents view reads these ops, names and attributes (v2 span items: {"value": ...}).
+    const attr = (k: string, v: string) => `"${k}":{"value":"${v}"`;
+    for (const op of ['gen_ai.invoke_agent', 'gen_ai.chat', 'gen_ai.execute_tool']) expect(all).toContain(attr('sentry.op', op));
+    for (const name of ['invoke_agent Dalang', 'chat fake', 'execute_tool director', 'execute_tool checks']) expect(all).toContain(`"name":"${name}"`);
+    expect(all).toContain(attr('gen_ai.agent.name', 'Dalang'));
+    expect(all).toContain(attr('gen_ai.provider.name', 'fake'));
+    expect(all).toContain(attr('gen_ai.request.model', 'fake'));
+    expect(all).toContain(attr('gen_ai.tool.name', 'director'));
     expect(all).toContain('gen_ai.usage.input_tokens');
     expect(all).not.toContain('ZZ-SENTINEL');
   });

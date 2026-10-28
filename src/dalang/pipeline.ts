@@ -8,6 +8,8 @@ import { CastingSchema, ScenesSchema, resolveActors, type Casting, type Storyboa
 import type { ZodType } from 'zod';
 
 export interface Provider {
+  /** Who serves the model, for tracing: known before any call is made. */
+  readonly info?: { provider: string; model: string };
   chat(req: {
     system: string;
     user: string;
@@ -121,13 +123,13 @@ export async function runDalang(story: StoryInput, provider: Provider, opts: Dal
         last = resolveActors({ ...casting, scenes: parsed.data.scenes });
         opts.onEvent({ type: 'progress', stage: 'checking' });
         const board = last;
-        const d = span('dalang.direct', { scenes: board.scenes.length }, (s) => {
+        const d = span('execute_tool director', { 'gen_ai.operation.name': 'execute_tool', 'gen_ai.tool.name': 'director', scenes: board.scenes.length }, (s) => {
           const out = direct(board, opts.seed);
           s.set('duration_s', Math.round(out.duration));
           s.set('notes', out.notes.length);
           return out;
         });
-        problems = span('dalang.check', {}, (s) => {
+        problems = span('execute_tool checks', { 'gen_ai.operation.name': 'execute_tool', 'gen_ai.tool.name': 'checks' }, (s) => {
           const v = validateLakon(d.lakon);
           const found = [...storyChecks(board, d), ...(v.ok ? [] : v.errors.map((e) => e.message))];
           s.set('problems', found.length);

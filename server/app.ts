@@ -35,13 +35,22 @@ const StoryInputSchema = z.object({
 
 const STEP: Record<number, string> = { 0.8: 'casting', 0.9: 'scenes', 0.4: 'repair' };
 
-/** Wraps every model call in a gen_ai span with model, tokens and estimated cost. */
+/** Wraps every model call in a Sentry "chat" span with model, tokens and estimated cost. */
 function traceProvider(provider: Provider, tracer: Tracer): Provider {
+  const model = provider.info?.model ?? 'unknown';
+  const attrs = (temperature: number) => ({
+    'gen_ai.operation.name': 'chat',
+    'gen_ai.request.model': model,
+    'gen_ai.provider.name': provider.info?.provider ?? 'unknown',
+    'gen_ai.request.temperature': temperature,
+    'dalang.step': STEP[temperature] ?? 'other',
+  });
   return {
+    info: provider.info,
     chat: (req) =>
-      tracer.run('gen_ai.chat', { 'dalang.step': STEP[req.temperature] ?? 'other', 'gen_ai.request.temperature': req.temperature }, async (span) => {
+      tracer.run(`chat ${model}`, attrs(req.temperature), async (span) => {
         const res = await provider.chat(req);
-        span.set('gen_ai.request.model', res.model);
+        span.set('gen_ai.response.model', res.model);
         span.set('gen_ai.usage.input_tokens', res.usage.input);
         span.set('gen_ai.usage.output_tokens', res.usage.output);
         span.set('dalang.cost_usd', costOf(res.model, res.usage));
@@ -96,7 +105,16 @@ export function createApp(deps: AppDeps): Hono {
       let lastProblems = Infinity;
       let model = '';
       try {
-        await tracer.run('dalang.run', { language: story.language, story_chars: Array.from(Object.values(story).join('')).length }, async (root) => {
+        await tracer.run(
+          'invoke_agent Dalang',
+          {
+            'gen_ai.operation.name': 'invoke_agent',
+            'gen_ai.agent.name': 'Dalang',
+            'gen_ai.request.model': provider.info?.model ?? 'unknown',
+            language: story.language,
+            story_chars: Array.from(Object.values(story).join('')).length,
+          },
+          async (root) => {
           const result = await runDalang(story, provider, {
             seed: seed(),
             fallback: deps.fallback,

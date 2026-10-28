@@ -20,6 +20,7 @@ export function createProvider(env: NodeJS.ProcessEnv): Provider {
   if (!client) throw new Error(`Unknown DALANG_PROVIDER "${kind}"`);
 
   return {
+    info: { provider: kind, model },
     async chat(req) {
       const res = await client.chat.completions.create(
         {

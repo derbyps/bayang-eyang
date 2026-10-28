@@ -5,6 +5,7 @@ import { SAMPLE_CASTING, SAMPLE_SCENES } from '../src/dalang/sample';
 export function createFakeProvider(opts: { delayMs?: number } = {}): Provider {
   const delayMs = opts.delayMs ?? 0;
   return {
+    info: { provider: 'fake', model: 'fake' },
     async chat(req) {
       if (delayMs) {
         await new Promise<void>((resolve, reject) => {
