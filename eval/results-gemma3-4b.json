@@ -1,0 +1,15 @@
+{
+  "model": "gemma3:4b",
+  "n": 12,
+  "firstTry": 0,
+  "avgRounds": 2.0833333333333335,
+  "fallbackRate": 0.6666666666666666,
+  "avgDropped": 0.5,
+  "p50ms": 251332,
+  "p90ms": 315834,
+  "avgTokens": 7820.833333333333,
+  "costPerPlay": 0,
+  "avgScenes": 5.5,
+  "avgActionStyles": 9.75,
+  "puppets": 4.25
+}

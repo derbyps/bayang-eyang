@@ -22,6 +22,10 @@ Privacy proof, same span with the Input tab open: "No input for this span".
 
 - first attempt on Cloudflare Gemma 4: 2 of 3 stories fell back to the demo play
 - after fixes (forgiving schema, repair prompts that repeat the story and cast, a director bug in `cross`): 12 of 12 real plays, 58% first try
-- small local model for contrast: gemma3:1b fell back on 3 of 3 stories
+- small local model for contrast: gemma3:1b fell back on 3 of 3 stories (before the robustness fixes)
+- offline ladder, same 12 stories, current code, on an 8 GB MacBook (Ollama):
+  - gemma3:1b: 12 of 12 fell back to the demo play (p50 27 s); it never wrote a valid cast
+  - gemma3:4b: 4 of 12 real plays, 8 fell back, 0% first try, p50 4 min 11 s / p90 5 min 16 s
+  - Gemma 4 26B (Cloudflare): 12 of 12 real plays, 75% first try, p50 25 s
 
 Image hosting: upload images through the DEV editor, or link them from `main` after the branch merges (branch links break when the branch is deleted).
