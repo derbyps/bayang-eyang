@@ -26,6 +26,8 @@ Privacy proof, same span with the Input tab open: "No input for this span".
 - offline ladder, same 12 stories, current code, on an 8 GB MacBook (Ollama):
   - gemma3:1b: 12 of 12 fell back to the demo play (p50 27 s); it never wrote a valid cast
   - gemma3:4b: 4 of 12 real plays, 8 fell back, 0% first try, p50 4 min 11 s / p90 5 min 16 s
+  - qwen3.5:4b, untrained: 0 real plays (11 stories ran fully; the 12th was cut off when the local server stopped), avg 1.7 repair rounds, p50 2 min 14 s
   - Gemma 4 26B (Cloudflare): 12 of 12 real plays, 75% first try, p50 25 s
+- teacher data: Gemma 4 invented 169 practice stories and performed 98 before the free daily allowance ran out; 91 passed every check (53 on the first try) = 182 training examples
 
 Image hosting: upload images through the DEV editor, or link them from `main` after the branch merges (branch links break when the branch is deleted).
