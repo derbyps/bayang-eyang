@@ -32,6 +32,7 @@ Privacy proof, same span with the Input tab open: "No input for this span".
   - why the 2 misses stay misses: the apprentice only ever saw first-try answers, never a repair round, so when it slips it can't fix itself; Gemma 4 can
   - training: 182 examples, 3 passes, ~$0.50 of Tinker credit; held-out loss 0.61 -> 0.38
   - local run of the apprentice on an 8 GB M1 (Ollama, nvfp4, 4.4 GB): answers correctly but 1-5 min per call; a full 12-story run froze the Mac (watchdog panic), so the 12-story number comes from the cloud run
+  - with memory free, the apprentice wrote a cast offline in 21 s on the M1; a whole play needs more RAM than 8 GB (a memory guard stopped the run at 3% free); a 16 GB laptop should run it comfortably (not tested)
 - teacher data: Gemma 4 invented 169 practice stories and performed 98 before the free daily allowance ran out; 91 passed every check (53 on the first try) = 182 training examples
 
 Image hosting: upload images through the DEV editor, or link them from `main` after the branch merges (branch links break when the branch is deleted).
