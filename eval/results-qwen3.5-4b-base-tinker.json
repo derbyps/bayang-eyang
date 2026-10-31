@@ -1,0 +1,15 @@
+{
+  "model": "Qwen/Qwen3.5-4B",
+  "n": 12,
+  "firstTry": 0,
+  "avgRounds": 2.0833333333333335,
+  "fallbackRate": 1,
+  "avgDropped": 0,
+  "p50ms": 9594,
+  "p90ms": 13412,
+  "avgTokens": 6760.083333333333,
+  "costPerPlay": 0,
+  "avgScenes": 0,
+  "avgActionStyles": 0,
+  "puppets": 0
+}
