@@ -5,8 +5,9 @@
 **Live:** https://bayang-eyang.buatkamu.tech. Tell it about someone, and Gemma 4 writes the play in about half a minute. Nothing you type is stored.
 
 ## Demo
+https://github.com/user-attachments/assets/cd3ddc36-29be-4e52-a459-fb30e55f0fcd
 
-<!-- Drop demo-gemma.mp4 here in the GitHub editor: the full play with gamelan sound. -->
+
 
 A made-up story ("Nenek Sari: the 1981 flood took her rice fields; she hid money in the rice tin and called it her bank") becomes *The Golden Rice Tin of Nenek Sari*. The half minute while the dalang writes is sped up 4×; the performance plays at real speed.
 
