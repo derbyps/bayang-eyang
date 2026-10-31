@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('plays offline after the first visit', async ({ page, context }) => {
-  await page.goto('/');
+  await page.goto('/?lakon=demo-eyang-putri');
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     await (window as unknown as { __offlineReady?: Promise<void> }).__offlineReady;
@@ -14,7 +14,7 @@ test('plays offline after the first visit', async ({ page, context }) => {
 });
 
 test('a returning visitor who is online gets the latest play, not the cached one', async ({ page, context }) => {
-  await page.goto('/');
+  await page.goto('/?lakon=demo-eyang-putri');
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     await (window as unknown as { __offlineReady?: Promise<void> }).__offlineReady;

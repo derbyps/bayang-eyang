@@ -20,7 +20,7 @@ test('hostile titles inside a script are shown as text, never run', async ({ pag
     lakon.scenes[0].title = evil;
     await route.fulfill({ response: res, json: lakon });
   });
-  await page.goto('/');
+  await page.goto('/?lakon=demo-eyang-putri');
   await page.getByRole('button', { name: /light the lamp/i }).click();
   await page.waitForTimeout(500);
   expect(await pwned(page)).toBeUndefined();

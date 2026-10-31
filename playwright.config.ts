@@ -9,7 +9,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
   },
   webServer: {
-    command: 'npx vite build && npx vite preview --port 4173 --strictPort',
+    command: 'npm run build && DALANG_PROVIDER=fake FAKE_DELAY_MS=300 DALANG_RATE_LIMIT=1000 PORT=4173 npm start',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

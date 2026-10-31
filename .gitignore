@@ -5,3 +5,9 @@ test-results
 playwright-report
 .DS_Store
 tests/visual/*-snapshots/*.actual.png
+.env
+apprentice/.venv
+apprentice/logs
+apprentice/weights
+apprentice/__pycache__
+docs/post/video

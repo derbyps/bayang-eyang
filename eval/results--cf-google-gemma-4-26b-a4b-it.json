@@ -1,0 +1,15 @@
+{
+  "model": "@cf/google/gemma-4-26b-a4b-it",
+  "n": 12,
+  "firstTry": 0.75,
+  "avgRounds": 0.3333333333333333,
+  "fallbackRate": 0,
+  "avgDropped": 0,
+  "p50ms": 25359,
+  "p90ms": 28359,
+  "avgTokens": 3901.3333333333335,
+  "costPerPlay": 0.0006455833333333333,
+  "avgScenes": 3.9166666666666665,
+  "avgActionStyles": 12.916666666666666,
+  "puppets": 4.666666666666667
+}

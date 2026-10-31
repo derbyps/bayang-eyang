@@ -1,0 +1,15 @@
+{
+  "model": "tinker://b17ec041-1f15-5f2c-aec5-7578448b430e:train:0/sampler_weights/final",
+  "n": 12,
+  "firstTry": 0.8333333333333334,
+  "avgRounds": 0.3333333333333333,
+  "fallbackRate": 0.16666666666666666,
+  "avgDropped": 0,
+  "p50ms": 8892,
+  "p90ms": 23385,
+  "avgTokens": 3606.1666666666665,
+  "costPerPlay": 0,
+  "avgScenes": 4.2,
+  "avgActionStyles": 13.8,
+  "puppets": 4.8
+}
